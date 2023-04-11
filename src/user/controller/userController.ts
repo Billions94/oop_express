@@ -1,14 +1,16 @@
 import { Router } from 'express';
-import { UserService } from '../service/user.service';
 import { setCache } from '../../cache/cache';
+import { UserService } from '../service/userService';
+import { Container, Service } from 'typedi';
 
+@Service()
 export class UserController {
   private readonly router: Router;
   private userService: UserService;
 
   constructor() {
     this.router = Router();
-    this.userService = new UserService();
+    this.userService =  Container.get(UserService);
   }
 
   init() {
@@ -24,11 +26,7 @@ export class UserController {
 
     // Get Users
     this.router.get('/', setCache('30 seconds'), async (_req, res) => {
-      res.send(
-        await this.userService
-          .getUsers()
-          .then((users) => users.map((user) => user.getJSONObject()))
-      );
+      res.send(await this.userService.getUsers());
     });
 
     // Get User by Id
@@ -36,7 +34,6 @@ export class UserController {
       res.send(
         await this.userService
           .getUserById(parseInt(params.id))
-          .then((user) => user.getJSONObject())
       );
     });
 

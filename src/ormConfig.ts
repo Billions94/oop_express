@@ -17,6 +17,7 @@ export default {
   reconnectInterval: 2000,
   entities: [
     `src/user/entity/**/*.${isCompiled ? 'js' : 'ts'}`,
+    `src/post/entity/**/*.${isCompiled ? 'js' : 'ts'}`,
   ],
   migrations: [
     `src/migration/**/*.${isCompiled ? 'js' : 'ts'}`,

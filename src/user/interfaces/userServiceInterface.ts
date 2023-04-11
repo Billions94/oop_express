@@ -9,7 +9,7 @@ export interface UserServiceInterface {
   createUser(userInput: UserInput): Promise<Partial<CreateUserResponse>>;
   login(email: string, password: string): Promise<Partial<LoginResponse>>
   getUsers(): Promise<User[]>;
-  getUserById(userId: number): Promise<User>;
-  updateUser(userId: number, userInput: UserInput): Promise<Partial<UserResponse>>
-  deleteUser(userId: number): Promise<DeleteResult>
+  getUserById(id: number): Promise<User>;
+  updateUser(id: number, userInput: UserInput): Promise<Partial<UserResponse>>
+  deleteUser(id: number): Promise<DeleteResult>
 }

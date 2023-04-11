@@ -1,9 +1,17 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Post } from '../../post/entity/post';
 
 @Entity({ name: 'user' })
 export class User {
   @PrimaryGeneratedColumn()
-  id = 0;
+  id: number = 0;
   @Column('varchar', { name: 'name', length: 500, nullable: false })
   name: string;
   @Column({ type: 'int', name: 'age', nullable: false })
@@ -11,10 +19,17 @@ export class User {
   @Index({ unique: true })
   @Column('varchar', { name: 'email', length: 500, nullable: false })
   email: string;
+  @OneToMany(() => Post, (post) => post.user, { eager: true })
+  @JoinColumn({ name: 'user_id' })
+  posts: Post[];
   @Column('varchar', { name: 'password', length: 500, nullable: false })
   password: string;
   @Column('varchar', { name: 'refresh_token', length: 500, nullable: true })
   private refreshToken: string | null;
+  @Column('timestamptz', { name: 'created_at', nullable: false })
+  createdAt: Date;
+  @Column('timestamp', { name: 'updated_at', nullable: true })
+  updatedAt: Date;
 
   constructor();
   constructor(name: string);
@@ -34,12 +49,16 @@ export class User {
       name: this.name,
       age: this.age,
       email: this.email,
+      posts: this.posts ?? [],
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
     };
   }
 
   getRefreshToken(): string {
     return <string>this.refreshToken;
   }
+
   setRefreshToken(value: string | null): void {
     this.refreshToken = value;
   }

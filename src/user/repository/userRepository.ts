@@ -1,25 +1,27 @@
 import { DB } from '../../db/dbConnect';
 import { User } from '../entity/user';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
+import { Service } from 'typedi';
 
+@Service()
 export class UserRepository extends Repository<User> {
   constructor() {
     super(User, DB.myDataSource.createEntityManager());
   }
 
-  async isExistByEmail(email: string) {
+  async isExistByEmail(email: string): Promise<User | null> {
     return this.findOne({ where: { email: email } });
   }
 
-  async findByEmail(email: string) {
+  async findByEmail(email: string): Promise<User | null>  {
     return this.findOne({ where: { email: email } });
   }
 
-  async findById(id: number) {
+  async findById(id: number): Promise<User | null>  {
     return this.findOne({ where: { id: id } });
   }
 
-  async deleteById(id: number) {
+  async deleteById(id: number): Promise<DeleteResult>  {
     return this.delete({ id: id });
   }
 }

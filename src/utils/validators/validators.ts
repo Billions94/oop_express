@@ -1,4 +1,4 @@
-import { UserInput } from '../../user/interface/userInput';
+import { UserInput } from '../../user/interfaces/userInput';
 
 export class Validator {
   public static validateInput(input: UserInput) {

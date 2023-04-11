@@ -1,7 +1,8 @@
 import { get } from 'lodash';
 import { RequestHandler } from 'express';
 import { JwtAuthService } from '../auth/jwtAuth.service';
-import { UserService } from '../user/service/user.service';
+import { UserService } from '../user/service/userService';
+import Logger from '../utils/log/Logger';
 
 const authGuard: RequestHandler = async (req, res, next) => {
   const jwtAuthService: JwtAuthService = new JwtAuthService();
@@ -26,6 +27,7 @@ const authGuard: RequestHandler = async (req, res, next) => {
     const { decodedToken, expired } = await jwtAuthService.verifyJwtAccessToken(
       accessToken
     );
+
     const user = await userService.getUserById(
       parseInt(<string>decodedToken?.id)
     );

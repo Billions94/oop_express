@@ -1,6 +1,6 @@
 export interface CreateUserResponse {
   status: string | number;
-  message: string;
+  errorMessage: string;
   data: {
     id: number | null;
     accessToken: string | null;

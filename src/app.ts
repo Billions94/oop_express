@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
 import { UserController } from './user/controller/userController';
@@ -7,11 +8,12 @@ import Requestlogger from './utils/log/RequestLogger';
 import Logger from './utils/log/logger';
 import authGuard from './middlewares/authGuard';
 import requireUser from './middlewares/requireUser';
+import { PostController } from './post/controller/postController';
+import { Container } from 'typedi';
 
 class App {
   server;
-  private readonly PORT: number = parseInt(<string>process.env.PORT) || 3030;
-  private readonly USERS_URL = '/api/users';
+  private readonly PORT = parseInt(<string>process.env.PORT) || 3030;
 
   constructor() {
     this.server = express();
@@ -39,13 +41,14 @@ class App {
     });
   }
 
-  private loadRoutes(): void {
-    this.server.use(this.USERS_URL, new UserController().init());
-  }
-
   private activateGuards(): void {
     this.server.use(authGuard);
     this.server.use(requireUser);
+  }
+
+  private loadRoutes(): void {
+    this.server.use('/api/users', Container.get(UserController).init());
+    this.server.use('/api/posts', Container.get(PostController).init());
   }
 }
 

@@ -9,9 +9,11 @@ import {
   VerifyRefreshTokenResponse,
 } from './interface';
 import { UserRepository } from '../user/repository/userRepository';
+import { Service } from 'typedi';
 
 dotenv.config();
 
+@Service()
 export class JwtAuthService {
   private readonly JWT_ACCESS_TOKEN_SECRET_KEY = <string>(
     process.env.JWT_ACCESS_TOKEN_SECRET_KEY
