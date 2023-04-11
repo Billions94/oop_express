@@ -28,7 +28,7 @@ export class User {
   private refreshToken: string | null;
   @Column('timestamptz', { name: 'created_at', nullable: false })
   createdAt: Date;
-  @Column('timestamp', { name: 'updated_at', nullable: true })
+  @Column('timestamptz', { name: 'updated_at', nullable: true })
   updatedAt: Date;
 
   constructor();
@@ -43,7 +43,7 @@ export class User {
     this.password = <string>password;
   }
 
-  getJSONObject(): Object {
+  getUserDetails(): Object {
     return {
       id: this.id,
       name: this.name,

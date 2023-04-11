@@ -13,15 +13,20 @@ export class UserRepository extends Repository<User> {
     return this.findOne({ where: { email: email } });
   }
 
-  async findByEmail(email: string): Promise<User | null>  {
+  async findByEmail(email: string): Promise<User | null> {
     return this.findOne({ where: { email: email } });
   }
 
-  async findById(id: number): Promise<User | null>  {
+  async findById(id: number): Promise<User | null> {
     return this.findOne({ where: { id: id } });
   }
 
-  async deleteById(id: number): Promise<DeleteResult>  {
+  async deleteById(id: number): Promise<DeleteResult> {
     return this.delete({ id: id });
+  }
+
+  async isExists(id: number): Promise<boolean> {
+    const existing = await this.findOne({ where: { id: id } });
+    return !!existing;
   }
 }

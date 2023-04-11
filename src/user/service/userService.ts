@@ -5,37 +5,30 @@ import { UserInput } from '../interfaces/userInput';
 import { CreateUserResponse } from '../interfaces/createUserResponse';
 import { Validator } from '../../utils/validators/validators';
 import { UserResponse } from '../interfaces/userResponse';
-import { DeleteResult } from 'typeorm';
 import { CredentialManager } from '../../auth/credential/credentialManager';
 import { JwtAuthService } from '../../auth/jwtAuth.service';
 import { LoginResponse } from '../interfaces/loginResponse';
 import bcryptService from 'bcrypt';
 import dotenv from 'dotenv';
 import * as process from 'process';
-import { Container, Service } from 'typedi';
+import { Service } from 'typedi';
+import { DeleteResponse } from '../interfaces/deleteResponse';
 
 dotenv.config();
 
 @Service()
 export class UserService implements UserServiceInterface {
-  private readonly userRepository: UserRepository;
-  private readonly jwtAuthService: JwtAuthService;
   private readonly SALT_FACTOR = parseInt(<string>process.env.SALT_FACTOR);
 
-  constructor() {
-    this.userRepository = Container.get(UserRepository);
-    this.jwtAuthService = Container.get(JwtAuthService);
-  }
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly jwtAuthService: JwtAuthService
+  ) {}
 
   async createUser(userInput: UserInput): Promise<Partial<CreateUserResponse>> {
     try {
       Validator.validateInput(userInput);
-      const existingUser = (await this.userRepository.isExistByEmail(
-        userInput.email
-      )) as User;
-
-      if (existingUser)
-        Validator.isExistsByEmail(existingUser.email, userInput.email);
+      await Validator.isExistsByEmail(userInput.email);
 
       const user: User = new User();
       user.name = userInput.name;
@@ -52,7 +45,7 @@ export class UserService implements UserServiceInterface {
 
       await this.userRepository.save(user);
       return {
-        status: '200:ok success',
+        statusCode: 200,
         data: {
           id: user.id,
           accessToken,
@@ -61,7 +54,7 @@ export class UserService implements UserServiceInterface {
       };
     } catch (e) {
       return {
-        status: '400: Bad Request',
+        statusCode: e.statusCode,
         errorMessage: e.message,
         data: { id: null, accessToken: null, refreshToken: null },
       };
@@ -80,7 +73,6 @@ export class UserService implements UserServiceInterface {
 
     const { accessToken, refreshToken } =
       await this.jwtAuthService.tokenGenerator(user);
-    await this.userRepository.save(user);
     return { accessToken, refreshToken };
   }
 
@@ -88,16 +80,26 @@ export class UserService implements UserServiceInterface {
     const users = await this.userRepository.find();
 
     if (users !== null) {
-      return users.map((user) => user.getJSONObject() as User);
+      return users.map((user) => <User>user.getUserDetails());
     }
     return [];
   }
 
-  async getUserById(id: number): Promise<User> {
-    return (
-      ((await this.userRepository.findById(id))?.getJSONObject() as User) ||
-      null
-    );
+  async getUserById(id: number): Promise<Partial<UserResponse>> {
+    try {
+      await Validator.throwErrorIfNotExist(id);
+      const user = await this.userRepository
+        .findById(id)
+        .then((u) => <User>u?.getUserDetails());
+
+      return { statusCode: 200, data: { user } };
+    } catch (e) {
+      return {
+        statusCode: e.statusCode,
+        errorMessage: e.message,
+        data: { user: null },
+      };
+    }
   }
 
   async updateUser(
@@ -105,20 +107,22 @@ export class UserService implements UserServiceInterface {
     userInput: UserInput
   ): Promise<Partial<UserResponse>> {
     try {
+      await Validator.throwErrorIfNotExist(id);
       await this.userRepository.update({ id: id }, userInput);
-      const user = <User>await this.userRepository.findById(id);
+      const user = <User>(
+        await this.userRepository.findById(id).then((u) => u?.getUserDetails())
+      );
       user.updatedAt = new Date();
       await this.userRepository.save(user);
+
       return {
-        status: '200:ok success',
-        errorMessage: 'User updated successfully',
-        data: {
-          user: <User>user.getJSONObject(),
-        },
+        statusCode: 200,
+        message: 'User updated successfully',
+        data: { user },
       };
     } catch (e) {
       return {
-        status: '400: Bad Request',
+        statusCode: e.statusCode,
         errorMessage: e.message,
         data: {
           user: null,
@@ -127,7 +131,13 @@ export class UserService implements UserServiceInterface {
     }
   }
 
-  async deleteUser(id: number): Promise<DeleteResult> {
-    return this.userRepository.delete({ id });
+  async deleteUser(id: number): Promise<DeleteResponse> {
+    try {
+      await Validator.throwErrorIfNotExist(id);
+      await this.userRepository.deleteById(id);
+      return { success: true };
+    } catch (e) {
+      return { success: false, errorMessage: e.message };
+    }
   }
 }

@@ -7,11 +7,9 @@ import { setCache } from '../../cache/cache';
 @Service()
 export class PostController {
   private readonly router: Router;
-  private readonly postService: PostService;
 
-  constructor() {
+  constructor(private readonly postService: PostService) {
     this.router = Router();
-    this.postService = Container.get(PostService);
   }
 
   init() {

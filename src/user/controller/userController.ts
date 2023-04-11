@@ -6,11 +6,9 @@ import { Container, Service } from 'typedi';
 @Service()
 export class UserController {
   private readonly router: Router;
-  private readonly userService: UserService;
 
-  constructor() {
+  constructor(private readonly userService: UserService) {
     this.router = Router();
-    this.userService = Container.get(UserService);
   }
 
   init() {

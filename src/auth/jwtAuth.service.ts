@@ -28,11 +28,8 @@ export class JwtAuthService {
     process.env.REFRESH_TOKEN_EXPIRATION_TIME
   );
   private readonly SALT_FACTOR = parseInt(<string>process.env.SALT_FACTOR);
-  private readonly userRepository: UserRepository;
 
-  constructor() {
-    this.userRepository = Container.get(UserRepository);
-  }
+  constructor(private readonly userRepository: UserRepository) {}
 
   async tokenGenerator(user: User): Promise<TokenResponse> {
     const accessToken = await this.generateAccessToken({
@@ -44,7 +41,7 @@ export class JwtAuthService {
 
     user.setRefreshToken(
       await bcryptService.hash(refreshToken, this.SALT_FACTOR)
-    )
+    );
 
     return { accessToken, refreshToken };
   }

@@ -1,5 +1,5 @@
 export interface CreateUserResponse {
-  status: string | number;
+  statusCode: number;
   errorMessage: string;
   data: {
     id: number | null;

@@ -1,7 +1,8 @@
 import { User } from '../entity/user';
 
 export  interface UserResponse {
-  status?: string | number;
+  statusCode?: number;
+  message?: string;
   errorMessage?: string;
   data: {
     user: User | null

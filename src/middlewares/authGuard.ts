@@ -3,7 +3,6 @@ import { RequestHandler } from 'express';
 import { JwtAuthService } from '../auth/jwtAuth.service';
 import { Container } from 'typedi';
 import { UserRepository } from '../user/repository/userRepository';
-import bcryptService from 'bcrypt';
 
 const authGuard: RequestHandler = async (req, res, next) => {
   const jwtAuthService: JwtAuthService = Container.get(JwtAuthService);

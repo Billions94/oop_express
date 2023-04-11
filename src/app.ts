@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import express from 'express';
+import express, { Express } from 'express';
 import cors from 'cors';
 import { UserController } from './user/controller/userController';
 import { DB } from './db/dbConnect';
@@ -10,9 +10,10 @@ import authGuard from './middlewares/authGuard';
 import requireUser from './middlewares/requireUser';
 import { PostController } from './post/controller/postController';
 import { Container } from 'typedi';
+import { Routes } from './route/routes';
 
 class App {
-  private readonly server;
+  private readonly server: Express;
   private readonly PORT = parseInt(<string>process.env.PORT) || 3030;
 
   constructor() {
@@ -47,8 +48,7 @@ class App {
   }
 
   private loadRoutes(): void {
-    this.server.use('/api/users', Container.get(UserController).init());
-    this.server.use('/api/posts', Container.get(PostController).init());
+    new Routes(this.server).initialize();
   }
 }
 
