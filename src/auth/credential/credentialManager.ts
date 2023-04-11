@@ -1,20 +1,15 @@
 import { UserRepository } from '../../user/repository/userRepository';
-import bcrypt from 'bcrypt';
+import bcryptService from 'bcrypt';
+import { Container } from 'typedi';
 
 export class CredentialManager {
-  private static userRepository: UserRepository = new UserRepository();
-  private static bcryptService = bcrypt;
+  private static userRepository: UserRepository = Container.get(UserRepository);
 
   static async verifyCredentials(email: string, password: string) {
-    const user = await CredentialManager
-      .userRepository
-      .findByEmail(email);
+    const user = await CredentialManager.userRepository.findByEmail(email);
 
     if (user) {
-      const isMatch = await CredentialManager
-        .bcryptService
-        .compare(password, user.password);
-      if (isMatch) {
+      if (await bcryptService.compare(password, user.password)) {
         return user;
       } else {
         return null;

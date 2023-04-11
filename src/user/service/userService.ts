@@ -9,23 +9,21 @@ import { DeleteResult } from 'typeorm';
 import { CredentialManager } from '../../auth/credential/credentialManager';
 import { JwtAuthService } from '../../auth/jwtAuth.service';
 import { LoginResponse } from '../interfaces/loginResponse';
-import bcrypt from 'bcrypt';
+import bcryptService from 'bcrypt';
 import dotenv from 'dotenv';
 import * as process from 'process';
-import Logger from '../../utils/log/Logger';
 import { Container, Service } from 'typedi';
 
 dotenv.config();
 
 @Service()
 export class UserService implements UserServiceInterface {
-  private userRepository: UserRepository;
-  private jwtAuthService: JwtAuthService;
-  private bcryptService = bcrypt;
-  private SALT_FACTOR = parseInt(<string>process.env.SALT_FACTOR);
+  private readonly userRepository: UserRepository;
+  private readonly jwtAuthService: JwtAuthService;
+  private readonly SALT_FACTOR = parseInt(<string>process.env.SALT_FACTOR);
 
   constructor() {
-    this.userRepository =  Container.get(UserRepository);
+    this.userRepository = Container.get(UserRepository);
     this.jwtAuthService = Container.get(JwtAuthService);
   }
 
@@ -43,16 +41,16 @@ export class UserService implements UserServiceInterface {
       user.name = userInput.name;
       user.age = userInput.age;
       user.email = userInput.email;
-      user.password = await this.bcryptService.hash(
+      user.password = await bcryptService.hash(
         userInput.password,
         this.SALT_FACTOR
       );
       user.createdAt = new Date();
 
-      await this.userRepository.save(user);
       const { accessToken, refreshToken } =
         await this.jwtAuthService.tokenGenerator(user);
 
+      await this.userRepository.save(user);
       return {
         status: '200:ok success',
         data: {
@@ -82,20 +80,20 @@ export class UserService implements UserServiceInterface {
 
     const { accessToken, refreshToken } =
       await this.jwtAuthService.tokenGenerator(user);
+    await this.userRepository.save(user);
     return { accessToken, refreshToken };
   }
 
   async getUsers(): Promise<User[]> {
     const users = await this.userRepository.find();
 
-    if (users.length > 0 || true) {
+    if (users !== null) {
       return users.map((user) => user.getJSONObject() as User);
     }
     return [];
   }
 
   async getUserById(id: number): Promise<User> {
-    Logger.info(id);
     return (
       ((await this.userRepository.findById(id))?.getJSONObject() as User) ||
       null
@@ -107,11 +105,15 @@ export class UserService implements UserServiceInterface {
     userInput: UserInput
   ): Promise<Partial<UserResponse>> {
     try {
+      await this.userRepository.update({ id: id }, userInput);
+      const user = <User>await this.userRepository.findById(id);
+      user.updatedAt = new Date();
+      await this.userRepository.save(user);
       return {
         status: '200:ok success',
         errorMessage: 'User updated successfully',
         data: {
-          user: <any>await this.userRepository.update({ id: id }, userInput),
+          user: <User>user.getJSONObject(),
         },
       };
     } catch (e) {

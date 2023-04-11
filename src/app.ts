@@ -12,7 +12,7 @@ import { PostController } from './post/controller/postController';
 import { Container } from 'typedi';
 
 class App {
-  server;
+  private readonly server;
   private readonly PORT = parseInt(<string>process.env.PORT) || 3030;
 
   constructor() {

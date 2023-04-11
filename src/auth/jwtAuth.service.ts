@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import * as process from 'process';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
+import jwtService from 'jsonwebtoken';
+import bcryptService from 'bcrypt';
 import { User } from '../user/entity/user';
 import {
   JwtPayload,
@@ -9,7 +9,7 @@ import {
   VerifyRefreshTokenResponse,
 } from './interface';
 import { UserRepository } from '../user/repository/userRepository';
-import { Service } from 'typedi';
+import { Container, Service } from 'typedi';
 
 dotenv.config();
 
@@ -28,12 +28,10 @@ export class JwtAuthService {
     process.env.REFRESH_TOKEN_EXPIRATION_TIME
   );
   private readonly SALT_FACTOR = parseInt(<string>process.env.SALT_FACTOR);
-  private jwtService = jwt;
-  private bcryptService = bcrypt;
-  private userRepository: UserRepository;
+  private readonly userRepository: UserRepository;
 
   constructor() {
-    this.userRepository = new UserRepository();
+    this.userRepository = Container.get(UserRepository);
   }
 
   async tokenGenerator(user: User): Promise<TokenResponse> {
@@ -45,16 +43,15 @@ export class JwtAuthService {
     });
 
     user.setRefreshToken(
-      await this.bcryptService.hash(refreshToken, this.SALT_FACTOR)
-    );
-    await this.userRepository.save(user);
+      await bcryptService.hash(refreshToken, this.SALT_FACTOR)
+    )
 
     return { accessToken, refreshToken };
   }
 
   async generateAccessToken(payload: JwtPayload) {
     return new Promise<string>((resolve, reject) => {
-      this.jwtService.sign(
+      jwtService.sign(
         payload,
         this.JWT_ACCESS_TOKEN_SECRET_KEY,
         {
@@ -71,7 +68,7 @@ export class JwtAuthService {
 
   async generateRefreshToken(payload: JwtPayload) {
     return new Promise<string>((resolve, reject) => {
-      this.jwtService.sign(
+      jwtService.sign(
         payload,
         this.JWT_REFRESH_TOKEN_SECRET_KEY,
         {
@@ -88,7 +85,7 @@ export class JwtAuthService {
 
   async verifyAccessToken(token: string): Promise<JwtPayload> {
     return new Promise<JwtPayload>((resolve, reject) => {
-      jwt.verify(
+      jwtService.verify(
         token,
         this.JWT_ACCESS_TOKEN_SECRET_KEY,
         (err, decodedToken) => {
@@ -101,7 +98,7 @@ export class JwtAuthService {
 
   async verifyRefreshToken(token: string): Promise<JwtPayload> {
     return new Promise((resolve, reject) => {
-      jwt.verify(
+      jwtService.verify(
         token,
         this.JWT_REFRESH_TOKEN_SECRET_KEY,
         (err, decodedToken) => {
@@ -138,16 +135,12 @@ export class JwtAuthService {
     if (!user) throw new Error('User not found');
 
     if (
-      await this.bcryptService.compare(
-        currentRefreshToken,
-        String(user.getRefreshToken())
-      )
+      await bcryptService.compare(currentRefreshToken, user.getRefreshToken())
     ) {
       const { accessToken, refreshToken } = await this.tokenGenerator(user);
-
       return { accessToken, refreshToken, user };
     } else {
-      throw new Error('Token is invalid');
+      throw new Error('Refresh token is invalid');
     }
   }
 

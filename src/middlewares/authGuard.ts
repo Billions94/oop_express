@@ -1,12 +1,13 @@
 import { get } from 'lodash';
 import { RequestHandler } from 'express';
 import { JwtAuthService } from '../auth/jwtAuth.service';
-import { UserService } from '../user/service/userService';
-import Logger from '../utils/log/Logger';
+import { Container } from 'typedi';
+import { UserRepository } from '../user/repository/userRepository';
+import bcryptService from 'bcrypt';
 
 const authGuard: RequestHandler = async (req, res, next) => {
-  const jwtAuthService: JwtAuthService = new JwtAuthService();
-  const userService: UserService = new UserService();
+  const jwtAuthService: JwtAuthService = Container.get(JwtAuthService);
+  const userRepository: UserRepository = Container.get(UserRepository);
 
   if (!req.headers.authorization) {
     if (
@@ -22,28 +23,30 @@ const authGuard: RequestHandler = async (req, res, next) => {
     const accessToken = req?.headers?.authorization?.replace('Bearer ', '');
     const refreshToken = get(req, 'headers.x-refresh');
 
-    if (!accessToken) return next();
+    if (!accessToken) {
+      return next();
+    }
 
     const { decodedToken, expired } = await jwtAuthService.verifyJwtAccessToken(
       accessToken
     );
 
-    const user = await userService.getUserById(
-      parseInt(<string>decodedToken?.id)
-    );
-
-    if (user) {
-      req.user = user;
-      return next();
-    }
-
-    if (expired && refreshToken) {
+    if (decodedToken !== null) {
+      const user = await userRepository.findById(
+        parseInt(<string>decodedToken?.id)
+      );
+      if (user) {
+        req.user = user;
+        return next();
+      }
+    } else if (expired && refreshToken) {
       const { accessToken, user } = await jwtAuthService.refreshTokens(
         String(refreshToken)
       );
 
       if (accessToken) {
         res.setHeader('x-access-token', accessToken);
+        res.setHeader('Authorization', 'Bearer ' + accessToken);
       }
 
       req.user = user;

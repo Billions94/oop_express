@@ -11,6 +11,7 @@ import { Container, Service } from 'typedi';
 @Service()
 export class PostService implements PostServiceInterface {
   private readonly postRepository: PostRepository;
+
   constructor() {
     this.postRepository = Container.get(PostRepository);
   }

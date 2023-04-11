@@ -2,11 +2,12 @@ import { PostService } from '../service/postService';
 import { Router } from 'express';
 import { User } from '../../user/entity/user';
 import { Container, Service } from 'typedi';
+import { setCache } from '../../cache/cache';
 
 @Service()
 export class PostController {
   private readonly router: Router;
-  private postService: PostService;
+  private readonly postService: PostService;
 
   constructor() {
     this.router = Router();
@@ -18,11 +19,11 @@ export class PostController {
       res.send(await this.postService.createPost(body, <User>user));
     });
 
-    this.router.get('/', async (_req, res) => {
+    this.router.get('/', setCache('30 seconds'), async (_req, res) => {
       res.send(await this.postService.getAllPosts());
     });
 
-    this.router.get('/:id', async ({ params }, res) => {
+    this.router.get('/:id', setCache('30 seconds'), async ({ params }, res) => {
       res.send(await this.postService.getPostById(parseInt(params.id)));
     });
 
