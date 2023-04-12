@@ -90,7 +90,7 @@ export class UserService implements UserServiceInterface {
       await Validator.throwErrorIfNotExist(id);
       const user = await this.userRepository
         .findById(id)
-        .then((u) => <User>u?.getUserDetails());
+        .then((user) => <User>user.getUserDetails());
 
       return { statusCode: 200, data: { user } };
     } catch (e) {
@@ -110,7 +110,9 @@ export class UserService implements UserServiceInterface {
       await Validator.throwErrorIfNotExist(id);
       await this.userRepository.update({ id: id }, userInput);
       const user = <User>(
-        await this.userRepository.findById(id).then((u) => u?.getUserDetails())
+        await this.userRepository
+          .findById(id)
+          .then((user) => <User>user.getUserDetails())
       );
       user.updatedAt = new Date();
       await this.userRepository.save(user);

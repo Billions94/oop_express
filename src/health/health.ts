@@ -1,6 +1,8 @@
 import { GET, Path } from 'typescript-rest';
 import { resOK } from './index';
 
+const version = require('../../package.json');
+
 
 @Path('/')
 class Health {
@@ -14,7 +16,7 @@ class Health {
   index(): { status: string, version: string } {
     return resOK({
                    status: 'ok',
-                   version: 'version',
+                   version: version,
                  });
   }
 }

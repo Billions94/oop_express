@@ -9,7 +9,7 @@ import {
   VerifyRefreshTokenResponse,
 } from './interface';
 import { UserRepository } from '../user/repository/userRepository';
-import { Container, Service } from 'typedi';
+import { Service } from 'typedi';
 
 dotenv.config();
 
@@ -33,10 +33,10 @@ export class JwtAuthService {
 
   async tokenGenerator(user: User): Promise<TokenResponse> {
     const accessToken = await this.generateAccessToken({
-      id: String(user?.id),
+      id: String(user.id),
     });
     const refreshToken = await this.generateRefreshToken({
-      id: String(user?.id),
+      id: String(user.id),
     });
 
     user.setRefreshToken(
@@ -87,7 +87,7 @@ export class JwtAuthService {
         this.JWT_ACCESS_TOKEN_SECRET_KEY,
         (err, decodedToken) => {
           if (err) reject(err);
-          else resolve(decodedToken as JwtPayload);
+          else resolve(<JwtPayload>decodedToken);
         }
       );
     });
@@ -100,7 +100,7 @@ export class JwtAuthService {
         this.JWT_REFRESH_TOKEN_SECRET_KEY,
         (err, decodedToken) => {
           if (err) reject(err);
-          else resolve(decodedToken as JwtPayload);
+          else resolve(<JwtPayload>decodedToken);
         }
       );
     });
