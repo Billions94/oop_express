@@ -22,7 +22,7 @@ export class UserService implements UserServiceInterface {
 
   async createUser(userInput: UserInput): Promise<Partial<CreateUserResponse>> {
     try {
-      Validator.validateInput(userInput);
+      Validator.validateRegisterInput(userInput);
       await Validator.isExistsByEmail(userInput.email);
 
       const user = await userRequestMapper(userInput);

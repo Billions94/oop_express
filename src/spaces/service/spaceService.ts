@@ -27,6 +27,7 @@ export class SpaceService {
       if (!this.spaceRepository)
         return { message: 'Space repository not found' };
 
+      Validator.validateSpaceInput(input);
       const space = spaceRequestMapper(input, user);
       await this.spaceRepository.save(space);
 
