@@ -3,9 +3,9 @@ import { UserRepository } from '../../user/repository/userRepository';
 import { Container } from 'typedi';
 import { CustomError } from '../../error/customError';
 import { SpaceRepository } from '../../spaces/repository/spaceRepository';
-import { Post } from '../../post/entity/post';
 import { PostRepository } from '../../post/repository/postRepository';
-import Logger from '../log/Logger';
+import { PostInput } from '../../post/interfaces/postInput';
+import { SpaceInput } from '../../spaces/interfaces/spaceInput';
 
 export class Validator {
   private static readonly userRepository: UserRepository =
@@ -15,11 +15,19 @@ export class Validator {
   private static readonly spaceRepository: SpaceRepository =
     Container.get(SpaceRepository);
 
-  public static validateInput(input: UserInput) {
+  /**
+   * @remarks This is a custom method.
+   * Throws specific input field errors if the field is empty or
+   * if the field does not meet the required validation criteria.
+   * @param input - A set of input fields to be validated.
+   * @returns A promise of type void.
+   */
+  public static validateRegisterInput(input: UserInput) {
     if (input.name.trim().length <= 0)
       throw new Error('Name field cannot be empty');
 
-    if (input.age <= 0) throw new Error('Age field cannot be zero or negative');
+    if (input.age <= 0)
+      throw new Error('Age field cannot be zero or negative');
 
     if (input.email.trim().length <= 0)
       throw new Error('Email field cannot be empty');
@@ -34,33 +42,74 @@ export class Validator {
       throw new Error('Passwords do not match');
   }
 
-  public static async isExistsByEmail(newEmail: string): Promise<void> {
-    const existingEmail = (
-      await Validator.userRepository.isExistByEmail(newEmail)
-    )?.email;
-
-    if (existingEmail === newEmail) throw new Error('Email already exists');
+  /**
+   * @remarks This is a custom method.
+   * Throws specific input field errors if the field is empty or
+   * if the field does not meet the required validation criteria.
+   * @param input - A set of input fields to be validated.
+   * @returns A promise of type void.
+   */
+  public static validatePostInput(input: PostInput) {
+    if (input.content.trim().length <= 0)
+      throw new Error('Content field cannot be empty');
   }
 
+  /**
+   * @remarks This is a custom method.
+   * Throws specific input field errors if the field is empty or
+   * if the field does not meet the required validation criteria.
+   * @param input - A set of input fields to be validated.
+   * @returns A promise of type void.
+   */
+  public static validateSpaceInput(input: SpaceInput) {
+    if (input.name.trim().length <= 0)
+      throw new Error('Name field cannot be empty');
+  }
+
+  /**
+   * @remarks This is a custom method.
+   * Throws an error if an email already exists in a connected
+   * database or datasource
+   * @param email - An email to compare with an existing email in
+   * a connected database or datasource
+   * @returns A promise of type void.
+   */
+  public static async isExistsByEmail(email: string): Promise<void> {
+    const existingEmail = (await Validator.userRepository.isExistByEmail(email))
+      ?.email;
+
+    if (existingEmail === email)
+      throw new Error('Email already exists');
+  }
+
+  /**
+   * @remarks This is a custom method.
+   * Throws an error for an entity passed as param, if they do not exist.
+   * The id has to be from the entity passed as matcher.
+   * @param id - Identifier for the entity eg. x.id, with x being the entity.
+   * @param matcher - Matcher or alias for the entity in lowercase
+   * eg. 'user' or 'post' or 'space'
+   * @returns A promise of type void.
+   * @beta
+   */
   public static async throwErrorIfNotExist(
     id: number,
     matcher?: string
   ): Promise<void> {
     switch (matcher) {
-      case 'users':
+      case 'user':
         const user = await this.userRepository.isExists(id);
         if (!user) {
           throw new CustomError(
             'userDoesNotExistError',
-            400,
+            404,
             'user does not exist'
           );
         }
         break;
 
-      case 'spaces':
+      case 'space':
         const space = await this.spaceRepository.isExists(id);
-        Logger.info(space)
         if (!space) {
           throw new CustomError(
             'spaceDoesNotExistError',
@@ -70,7 +119,7 @@ export class Validator {
         }
         break;
 
-      case 'posts':
+      case 'post':
         const post = await this.postRepository.isExists(id);
         if (!post) {
           throw new CustomError(
@@ -83,7 +132,7 @@ export class Validator {
 
       default:
         throw new CustomError(
-          'couldNotDetermineSpace',
+          'generic error',
           500,
           'could not determine error Object'
         );

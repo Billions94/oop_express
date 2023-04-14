@@ -1,20 +1,20 @@
 import 'reflect-metadata';
 import express, { Express } from 'express';
 import cors from 'cors';
-import { UserController } from './user/controller/userController';
 import { DB } from './db/dbConnect';
-import * as process from 'process';
+import { Routes } from './route/routes';
 import Requestlogger from './utils/log/RequestLogger';
-import Logger from './utils/log/logger';
 import authGuard from './middlewares/authGuard';
 import requireUser from './middlewares/requireUser';
-import { PostController } from './post/controller/postController';
-import { Container } from 'typedi';
-import { Routes } from './route/routes';
+import Logger from './utils/log/logger';
+import dotenv from 'dotenv';
+import * as process from 'process';
+
+dotenv.config()
 
 class App {
   private readonly server: Express;
-  private readonly PORT = parseInt(<string>process.env.PORT) || 3030;
+  private readonly PORT = parseInt(<string>process.env.PORT);
 
   constructor() {
     this.server = express();

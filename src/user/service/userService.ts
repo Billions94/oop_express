@@ -9,7 +9,7 @@ import { CredentialManager } from '../../auth/credential/credentialManager';
 import { JwtAuthService } from '../../auth/jwtAuth.service';
 import { LoginResponse } from '../interfaces/loginResponse';
 import { Service } from 'typedi';
-import { DeleteResponse } from '../interfaces/deleteResponse';
+import { DeleteUserResponse } from '../interfaces/deleteUserResponse';
 import { userResponseMapper } from '../mapper/response/userResponseMapper';
 import { userRequestMapper } from '../mapper/request/userRequestMapper';
 
@@ -22,7 +22,7 @@ export class UserService implements UserServiceInterface {
 
   async createUser(userInput: UserInput): Promise<Partial<CreateUserResponse>> {
     try {
-      Validator.validateInput(userInput);
+      Validator.validateRegisterInput(userInput);
       await Validator.isExistsByEmail(userInput.email);
 
       const user = await userRequestMapper(userInput);
@@ -70,7 +70,7 @@ export class UserService implements UserServiceInterface {
 
   async getUserById(id: number): Promise<Partial<UserResponse>> {
     try {
-      await Validator.throwErrorIfNotExist(id, 'users');
+      await Validator.throwErrorIfNotExist(id, 'user');
       const user = await this.userRepository
         .findById(id)
         .then(userResponseMapper);
@@ -90,7 +90,7 @@ export class UserService implements UserServiceInterface {
     userInput: UserInput
   ): Promise<Partial<UserResponse>> {
     try {
-      await Validator.throwErrorIfNotExist(id, 'users');
+      await Validator.throwErrorIfNotExist(id, 'user');
       await this.userRepository.update(id, userInput);
       const user = <User>(
         await this.userRepository.findById(id).then(userResponseMapper)
@@ -113,13 +113,17 @@ export class UserService implements UserServiceInterface {
     }
   }
 
-  async deleteUser(id: number): Promise<DeleteResponse> {
+  async deleteUser(id: number): Promise<DeleteUserResponse> {
     try {
-      await Validator.throwErrorIfNotExist(id, 'users');
+      await Validator.throwErrorIfNotExist(id, 'user');
       await this.userRepository.deleteById(id);
-      return { success: true };
+      return { statusCode: 200, success: true };
     } catch (e) {
-      return { success: false, errorMessage: e.message };
+      return {
+        statusCode: e.statusCode,
+        success: false,
+        errorMessage: e.message,
+      };
     }
   }
 }

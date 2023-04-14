@@ -4,7 +4,7 @@ import { CreateUserResponse } from './createUserResponse';
 import { UserResponse } from './userResponse';
 import { DeleteResult } from 'typeorm';
 import { LoginResponse } from './loginResponse';
-import { DeleteResponse } from './deleteResponse';
+import { DeleteUserResponse } from './deleteUserResponse';
 
 export interface UserServiceInterface {
   createUser(userInput: UserInput): Promise<Partial<CreateUserResponse>>;
@@ -12,5 +12,5 @@ export interface UserServiceInterface {
   getUsers(): Promise<User[]>;
   getUserById(id: number): Promise<Partial<UserResponse>>;
   updateUser(id: number, userInput: UserInput): Promise<Partial<UserResponse>>
-  deleteUser(id: number): Promise<DeleteResponse>
+  deleteUser(id: number): Promise<DeleteUserResponse>
 }

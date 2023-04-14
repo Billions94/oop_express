@@ -27,6 +27,7 @@ export class SpaceService {
       if (!this.spaceRepository)
         return { message: 'Space repository not found' };
 
+      Validator.validateSpaceInput(input);
       const space = spaceRequestMapper(input, user);
       await this.spaceRepository.save(space);
 
@@ -38,6 +39,7 @@ export class SpaceService {
         data: { id: space.id },
       };
     } catch (e) {
+      Logger.info(e)
       return {
         statusCode: e.statusCode,
         message: e.message,
@@ -47,11 +49,16 @@ export class SpaceService {
   }
 
   async getSpaces(): Promise<Space[]> {
-    if (!this.spaceRepository) return [];
+    try {
+      if (!this.spaceRepository) return [];
 
-    const spaces = await this.spaceRepository.findAndIncludeUserRelation();
-    spaces.map(removeUserSensitiveInfo);
-    return spaces;
+      const spaces = await this.spaceRepository.findAndIncludeUserRelation();
+      spaces.map(removeUserSensitiveInfo);
+      return spaces;
+    } catch (e) {
+      Logger.info(e.message)
+      return []
+    }
   }
 
   async getSpaceById(id: number): Promise<Partial<SpaceResponse>> {
@@ -59,7 +66,7 @@ export class SpaceService {
       if (!this.spaceRepository)
         return { message: 'Space repository not found' };
 
-      await Validator.throwErrorIfNotExist(id, 'spaces');
+      await Validator.throwErrorIfNotExist(id, 'space');
       const space = await this.spaceRepository.findById(id);
       return {
         statusCode: 200,
@@ -67,6 +74,7 @@ export class SpaceService {
         data: { space },
       };
     } catch (e) {
+      Logger.info(e)
       return {
         statusCode: e.statusCode,
         message: e.message,
@@ -84,7 +92,7 @@ export class SpaceService {
       if (!this.spaceRepository)
         return { message: 'Space repository not found' };
 
-      await Validator.throwErrorIfNotExist(id, 'spaces');
+      await Validator.throwErrorIfNotExist(id, 'space');
       const space = await this.spaceRepository.findById(id);
       space.name = update.name;
       if (!update.isActive) {
@@ -121,6 +129,7 @@ export class SpaceService {
       if (!this.spaceRepository)
         return { message: 'Space repository not found' };
 
+      await Validator.throwErrorIfNotExist(id, 'space');
       await this.spaceRepository.deleteByManyToManyRelations(id, user);
       return {
         statusCode: 200,
