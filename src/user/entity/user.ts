@@ -1,12 +1,19 @@
 import {
+  BeforeInsert,
+  BeforeUpdate,
   Column,
+  DeleteDateColumn,
   Entity,
   Index,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Post } from '../../post/entity/post';
+import { Space } from '../../spaces/entity/space';
+import bcryptService from 'bcrypt';
 
 @Entity({ name: 'user' })
 export class User {
@@ -22,14 +29,22 @@ export class User {
   @OneToMany(() => Post, (post) => post.user, { eager: true })
   @JoinColumn({ name: 'user_id' })
   posts: Post[];
+  @ManyToMany(() => Space, (space) => space.users, {
+    eager: true,
+    cascade: ['remove'],
+  })
+  @JoinTable({ name: 'user_space' })
+  spaces: Space[];
   @Column('varchar', { name: 'password', length: 500, nullable: false })
   password: string;
   @Column('varchar', { name: 'refresh_token', length: 500, nullable: true })
-  private refreshToken: string | null;
+  refreshToken: string | null;
   @Column('timestamptz', { name: 'created_at', nullable: false })
   createdAt: Date;
   @Column('timestamptz', { name: 'updated_at', nullable: true })
   updatedAt: Date;
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   constructor();
   constructor(name: string);
@@ -43,23 +58,13 @@ export class User {
     this.password = <string>password;
   }
 
-  getUserDetails(): Object {
-    return {
-      id: this.id,
-      name: this.name,
-      age: this.age,
-      email: this.email,
-      posts: this.posts ?? [],
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
-    };
+  @BeforeInsert()
+  updateCreatedAt() {
+    this.createdAt = new Date();
   }
 
-  getRefreshToken(): string {
-    return <string>this.refreshToken;
-  }
-
-  setRefreshToken(value: string | null): void {
-    this.refreshToken = value;
+  @BeforeUpdate()
+  updateUpdatedAt() {
+    this.updatedAt = new Date();
   }
 }

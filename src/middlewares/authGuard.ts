@@ -3,6 +3,15 @@ import { RequestHandler } from 'express';
 import { JwtAuthService } from '../auth/jwtAuth.service';
 import { Container } from 'typedi';
 import { UserRepository } from '../user/repository/userRepository';
+import { User as ExpressUser } from '../user/entity/user';
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: ExpressUser;
+    }
+  }
+}
 
 const authGuard: RequestHandler = async (req, res, next) => {
   const jwtAuthService: JwtAuthService = Container.get(JwtAuthService);
@@ -39,9 +48,12 @@ const authGuard: RequestHandler = async (req, res, next) => {
         return next();
       }
     } else if (expired && refreshToken) {
-      const { accessToken, user } = await jwtAuthService.refreshTokens(
-        String(refreshToken)
-      );
+      const { accessToken, user, errorMessage } =
+        await jwtAuthService.refreshTokens(String(refreshToken));
+
+      if (!accessToken && !user && errorMessage) {
+        res.status(403).send(errorMessage);
+      }
 
       if (accessToken) {
         res.setHeader('x-access-token', accessToken);
