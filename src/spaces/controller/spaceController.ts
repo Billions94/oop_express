@@ -1,7 +1,6 @@
 import { SpaceService } from '../service/spaceService';
 import { Service } from 'typedi';
 import { Router } from 'express';
-import Logger from '../../utils/log/Logger';
 import { User } from '../../user/entity/user';
 
 @Service()

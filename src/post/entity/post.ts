@@ -1,4 +1,5 @@
 import {
+  BeforeInsert, BeforeUpdate,
   Column,
   Entity,
   JoinColumn,
@@ -23,22 +24,13 @@ export class Post {
   @Column('timestamptz', { name: 'updated_at', nullable: true })
   updatedAt: Date;
 
-  constructor();
-  constructor(content: string);
-  constructor(content: string, media: string);
-  constructor(content?: string, media?: string) {
-    this.content = <string>content;
-    this.media = <string>media;
+  @BeforeInsert()
+  updateCreatedAt() {
+    this.createdAt = new Date();
   }
 
-  toJSONObject(): Object {
-    return {
-      id: this.id,
-      user: this.user,
-      content: this.content,
-      media: this.media,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
-    };
+  @BeforeUpdate()
+  updateUpdatedAt() {
+    this.updatedAt = new Date();
   }
 }

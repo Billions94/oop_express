@@ -1,5 +1,5 @@
 import { Space } from '../entity/space';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { DB } from '../../db/dbConnect';
 import { Service } from 'typedi';
 import { User } from '../../user/entity/user';

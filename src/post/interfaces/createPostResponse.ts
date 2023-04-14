@@ -1,7 +1,7 @@
 export interface CreatePostResponse {
-  status: string;
+  statusCode: number;
+  errorMessage: string;
   data: {
     id: number | null;
   };
-  errorMessage: string;
 }

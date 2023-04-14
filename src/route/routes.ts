@@ -6,9 +6,6 @@ import { SpaceController } from '../spaces/controller/spaceController';
 
 @Service()
 export class Routes {
-  private readonly USER_URL = '/api/users';
-  private readonly POST_URL = '/api/posts';
-  private readonly SPACE_URL = '/api/spaces';
   private readonly userController: UserController;
   private readonly postController: PostController;
   private readonly spaceController: SpaceController;
@@ -22,8 +19,8 @@ export class Routes {
   }
 
   initialize(): void {
-    this.server.use(this.USER_URL, this.userController.init());
-    this.server.use(this.POST_URL, this.postController.init());
-    this.server.use(this.SPACE_URL, this.spaceController.init());
+    this.server.use('/api/users', this.userController.init());
+    this.server.use('/api/posts', this.postController.init());
+    this.server.use('/api/spaces', this.spaceController.init());
   }
 }

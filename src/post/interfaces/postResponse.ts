@@ -1,7 +1,8 @@
 import { Post } from '../entity/post';
 
 export interface PostResponse {
-  status: string;
+  statusCode: number;
+  success: boolean;
   errorMessage: string;
   data: {
     post: Post | null
