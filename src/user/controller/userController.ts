@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { setCache } from '../../cache/cache';
 import { UserService } from '../service/userService';
-import { Container, Service } from 'typedi';
+import { Service } from 'typedi';
 
 @Service()
 export class UserController {

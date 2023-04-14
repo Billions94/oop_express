@@ -8,18 +8,13 @@ import { UserResponse } from '../interfaces/userResponse';
 import { CredentialManager } from '../../auth/credential/credentialManager';
 import { JwtAuthService } from '../../auth/jwtAuth.service';
 import { LoginResponse } from '../interfaces/loginResponse';
-import bcryptService from 'bcrypt';
-import dotenv from 'dotenv';
-import * as process from 'process';
 import { Service } from 'typedi';
 import { DeleteResponse } from '../interfaces/deleteResponse';
-
-dotenv.config();
+import { userResponseMapper } from '../mapper/response/userResponseMapper';
+import { userRequestMapper } from '../mapper/request/userRequestMapper';
 
 @Service()
 export class UserService implements UserServiceInterface {
-  private readonly SALT_FACTOR = parseInt(<string>process.env.SALT_FACTOR);
-
   constructor(
     private readonly userRepository: UserRepository,
     private readonly jwtAuthService: JwtAuthService
@@ -30,16 +25,7 @@ export class UserService implements UserServiceInterface {
       Validator.validateInput(userInput);
       await Validator.isExistsByEmail(userInput.email);
 
-      const user: User = new User();
-      user.name = userInput.name;
-      user.age = userInput.age;
-      user.email = userInput.email;
-      user.password = await bcryptService.hash(
-        userInput.password,
-        this.SALT_FACTOR
-      );
-      user.createdAt = new Date();
-
+      const user = await userRequestMapper(userInput);
       const { accessToken, refreshToken } =
         await this.jwtAuthService.tokenGenerator(user);
 
@@ -68,7 +54,7 @@ export class UserService implements UserServiceInterface {
     const user = await CredentialManager.verifyCredentials(email, password);
 
     if (!user) {
-      throw new Error('Invalid email or password');
+      return { errorMessage: 'Invalid email or password' };
     }
 
     const { accessToken, refreshToken } =
@@ -77,20 +63,17 @@ export class UserService implements UserServiceInterface {
   }
 
   async getUsers(): Promise<User[]> {
-    const users = await this.userRepository.find();
-
-    if (users !== null) {
-      return users.map((user) => <User>user.getUserDetails());
-    }
-    return [];
+    return await this.userRepository
+      .find()
+      .then((users) => users.map(userResponseMapper));
   }
 
   async getUserById(id: number): Promise<Partial<UserResponse>> {
     try {
-      await Validator.throwErrorIfNotExist(id);
+      await Validator.throwErrorIfNotExist(id, 'users');
       const user = await this.userRepository
         .findById(id)
-        .then((u) => <User>u?.getUserDetails());
+        .then(userResponseMapper);
 
       return { statusCode: 200, data: { user } };
     } catch (e) {
@@ -107,12 +90,11 @@ export class UserService implements UserServiceInterface {
     userInput: UserInput
   ): Promise<Partial<UserResponse>> {
     try {
-      await Validator.throwErrorIfNotExist(id);
-      await this.userRepository.update({ id: id }, userInput);
+      await Validator.throwErrorIfNotExist(id, 'users');
+      await this.userRepository.update(id, userInput);
       const user = <User>(
-        await this.userRepository.findById(id).then((u) => u?.getUserDetails())
+        await this.userRepository.findById(id).then(userResponseMapper)
       );
-      user.updatedAt = new Date();
       await this.userRepository.save(user);
 
       return {
@@ -133,7 +115,7 @@ export class UserService implements UserServiceInterface {
 
   async deleteUser(id: number): Promise<DeleteResponse> {
     try {
-      await Validator.throwErrorIfNotExist(id);
+      await Validator.throwErrorIfNotExist(id, 'users');
       await this.userRepository.deleteById(id);
       return { success: true };
     } catch (e) {

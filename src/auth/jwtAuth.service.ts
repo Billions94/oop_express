@@ -3,13 +3,14 @@ import * as process from 'process';
 import jwtService from 'jsonwebtoken';
 import bcryptService from 'bcrypt';
 import { User } from '../user/entity/user';
-import {
-  JwtPayload,
-  TokenResponse,
-  VerifyRefreshTokenResponse,
-} from './interface';
 import { UserRepository } from '../user/repository/userRepository';
-import { Container, Service } from 'typedi';
+import { Service } from 'typedi';
+import {
+  TokenResponse,
+  JwtPayload,
+  VerifyRefreshTokenResponse,
+  RefreshTokenResponse,
+} from './interface/jwtAuthInterface';
 
 dotenv.config();
 
@@ -33,15 +34,22 @@ export class JwtAuthService {
 
   async tokenGenerator(user: User): Promise<TokenResponse> {
     const accessToken = await this.generateAccessToken({
-      id: String(user?.id),
+      id: String(user.id),
     });
     const refreshToken = await this.generateRefreshToken({
-      id: String(user?.id),
+      id: String(user.id),
     });
 
-    user.setRefreshToken(
-      await bcryptService.hash(refreshToken, this.SALT_FACTOR)
+    const hashedRefresh = await bcryptService.hash(
+      refreshToken,
+      this.SALT_FACTOR
     );
+
+    await this.userRepository
+      .createQueryBuilder('user')
+      .update(user)
+      .set({ refreshToken: hashedRefresh })
+      .execute();
 
     return { accessToken, refreshToken };
   }
@@ -87,7 +95,7 @@ export class JwtAuthService {
         this.JWT_ACCESS_TOKEN_SECRET_KEY,
         (err, decodedToken) => {
           if (err) reject(err);
-          else resolve(decodedToken as JwtPayload);
+          else resolve(<JwtPayload>decodedToken);
         }
       );
     });
@@ -100,7 +108,7 @@ export class JwtAuthService {
         this.JWT_REFRESH_TOKEN_SECRET_KEY,
         (err, decodedToken) => {
           if (err) reject(err);
-          else resolve(decodedToken as JwtPayload);
+          else resolve(<JwtPayload>decodedToken);
         }
       );
     });
@@ -125,19 +133,24 @@ export class JwtAuthService {
     }
   }
 
-  async refreshTokens(currentRefreshToken: string) {
+  async refreshTokens(
+    currentRefreshToken: string
+  ): Promise<Partial<RefreshTokenResponse>> {
     const decodedToken = await this.verifyRefreshToken(currentRefreshToken);
     const user = await this.userRepository.findById(parseInt(decodedToken.id));
 
     if (!user) throw new Error('User not found');
 
     if (
-      await bcryptService.compare(currentRefreshToken, user.getRefreshToken())
+      await bcryptService.compare(
+        currentRefreshToken,
+        <string>user.refreshToken
+      )
     ) {
       const { accessToken, refreshToken } = await this.tokenGenerator(user);
       return { accessToken, refreshToken, user };
     } else {
-      throw new Error('Refresh token is invalid');
+      return { errorMessage: 'Refresh token is invalid' };
     }
   }
 
@@ -147,7 +160,7 @@ export class JwtAuthService {
 
     if (!user) throw new Error('User not found');
 
-    user.setRefreshToken(null);
+    user.refreshToken = null;
     await this.userRepository.save(user);
     return true;
   }

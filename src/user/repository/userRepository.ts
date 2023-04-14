@@ -17,8 +17,12 @@ export class UserRepository extends Repository<User> {
     return this.findOne({ where: { email: email } });
   }
 
-  async findById(id: number): Promise<User | null> {
-    return this.findOne({ where: { id: id } });
+  async findById(id: number): Promise<User> {
+    return await this.findOne({ where: { id: id } }) as User;
+  }
+
+  async findByDeletedAt(deletedAt: Date): Promise<User | null> {
+    return await this.findOne({ where: { deletedAt: deletedAt }})
   }
 
   async deleteById(id: number): Promise<DeleteResult> {
