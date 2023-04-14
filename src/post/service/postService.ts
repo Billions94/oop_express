@@ -1,12 +1,16 @@
-import { PostInput } from '../interfaces/postInput';
-import { CreatePostResponse } from '../interfaces/createPostResponse';
 import { Post } from '../entity/post';
 import { PostRepository } from '../repository/postRepository';
 import { User } from '../../user/entity/user';
+import { Validator } from '../../utils/validators/validators';
+import { PostInput } from '../interfaces/postInput';
+import { CreatePostResponse } from '../interfaces/createPostResponse';
 import { PostResponse } from '../interfaces/postResponse';
 import { PostServiceInterface } from '../interfaces/postServiceInterface';
-import { DeleteResult } from 'typeorm';
-import { Container, Service } from 'typedi';
+import { Service } from 'typedi';
+import { postResponseMapper } from '../mapper/response/postResponseMapper';
+import { DeletePostResponse } from '../interfaces/deletePostResponse';
+import Logger from '../../utils/log/Logger';
+import { postRequestMapper } from '../mapper/request/postRequestMapper';
 
 @Service()
 export class PostService implements PostServiceInterface {
@@ -16,36 +20,45 @@ export class PostService implements PostServiceInterface {
     user: User
   ): Promise<Partial<CreatePostResponse>> {
     try {
-      const post: Post = new Post();
-      post.user = user;
-      post.content = postInput.content;
-      post.media = <string>postInput.media;
-      post.createdAt = new Date();
-
+      const post: Post = postRequestMapper(postInput, user)
       await this.postRepository.save(post);
-      return { status: '200: success', data: { id: post.id } };
+
+      return { statusCode: 200, data: { id: post.id } };
     } catch (e) {
+      Logger.info(e.message);
       return {
-        status: '400: Bad request',
+        statusCode: e.statusCode,
         errorMessage: e.message,
-        data: {
-          id: null,
-        },
+        data: { id: null },
       };
     }
   }
 
   async getAllPosts(): Promise<Post[]> {
-    const posts: Post[] = await this.postRepository.find();
-
-    if (posts.length > 0) {
-      return posts.map((p) => p.toJSONObject()) as Post[];
+    try {
+      return await this.postRepository
+        .find()
+        .then((post) => post.map(postResponseMapper));
+    } catch (e) {
+      Logger.info(e.message);
+      return [];
     }
-    return [];
   }
 
-  async getPostById(id: number): Promise<Post> {
-    return <Post>await this.postRepository.findById(id);
+  async getPostById(id: number): Promise<Partial<PostResponse>> {
+    try {
+      const post = await this.postRepository
+        .findById(id)
+        .then(postResponseMapper);
+      return { statusCode: 200, success: true, data: { post } };
+    } catch (e) {
+      Logger.info(e.message);
+      return {
+        statusCode: e.statusCode,
+        success: false,
+        data: { post: null },
+      };
+    }
   }
 
   async updatePost(
@@ -54,23 +67,38 @@ export class PostService implements PostServiceInterface {
   ): Promise<Partial<PostResponse>> {
     try {
       await this.postRepository.update({ id: id }, update);
-      const post = <Post>await this.postRepository.findById(id);
-      post.updatedAt = new Date();
+      const post = await this.postRepository
+        .findById(id)
+        .then(postResponseMapper);
+
       await this.postRepository.save(post);
       return {
-        status: '203:OK, success',
-        data: { post: <Post>post.toJSONObject() },
+        statusCode: 203,
+        success: true,
+        data: { post: post },
       };
     } catch (e) {
+      Logger.info(e.message);
       return {
-        status: '404: bad request',
+        statusCode: e.statusCode,
         errorMessage: e.message,
         data: { post: null },
       };
     }
   }
 
-  async deletePost(id: number): Promise<DeleteResult> {
-    return await this.postRepository.delete({ id });
+  async deletePost(id: number): Promise<Partial<DeletePostResponse>> {
+    try {
+      await Validator.throwErrorIfNotExist(id, 'post');
+      await this.postRepository.deleteById(id);
+      return { statusCode: 200, success: true };
+    } catch (e) {
+      Logger.info(e.message);
+      return {
+        statusCode: e.statusCode,
+        success: false,
+        errorMessage: e.message
+      }
+    }
   }
 }
