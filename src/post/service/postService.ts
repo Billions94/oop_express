@@ -9,8 +9,8 @@ import { PostServiceInterface } from '../interfaces/postServiceInterface';
 import { Service } from 'typedi';
 import { postResponseMapper } from '../mapper/response/postResponseMapper';
 import { DeletePostResponse } from '../interfaces/deletePostResponse';
-import Logger from '../../utils/log/Logger';
 import { postRequestMapper } from '../mapper/request/postRequestMapper';
+import Logger from '../../utils/log/Logger';
 
 @Service()
 export class PostService implements PostServiceInterface {
@@ -20,7 +20,8 @@ export class PostService implements PostServiceInterface {
     user: User
   ): Promise<Partial<CreatePostResponse>> {
     try {
-      const post: Post = postRequestMapper(postInput, user)
+      Validator.validatePostInput(postInput);
+      const post: Post = postRequestMapper(postInput, user);
       await this.postRepository.save(post);
 
       return { statusCode: 200, data: { id: post.id } };
@@ -47,6 +48,7 @@ export class PostService implements PostServiceInterface {
 
   async getPostById(id: number): Promise<Partial<PostResponse>> {
     try {
+      await Validator.throwErrorIfNotExist(id, 'post');
       const post = await this.postRepository
         .findById(id)
         .then(postResponseMapper);
@@ -56,6 +58,7 @@ export class PostService implements PostServiceInterface {
       return {
         statusCode: e.statusCode,
         success: false,
+        errorMessage: e.message,
         data: { post: null },
       };
     }
@@ -66,6 +69,7 @@ export class PostService implements PostServiceInterface {
     update: PostInput
   ): Promise<Partial<PostResponse>> {
     try {
+      await Validator.throwErrorIfNotExist(id, 'post');
       await this.postRepository.update({ id: id }, update);
       const post = await this.postRepository
         .findById(id)
@@ -97,8 +101,8 @@ export class PostService implements PostServiceInterface {
       return {
         statusCode: e.statusCode,
         success: false,
-        errorMessage: e.message
-      }
+        errorMessage: e.message,
+      };
     }
   }
 }
