@@ -11,6 +11,7 @@ import {
   VerifyRefreshTokenResponse,
   RefreshTokenResponse,
 } from './interface/jwtAuthInterface';
+import { Inject } from 'typescript-ioc';
 
 dotenv.config();
 
@@ -30,7 +31,7 @@ export class JwtAuthService {
   );
   private readonly SALT_FACTOR = parseInt(<string>process.env.SALT_FACTOR);
 
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(@Inject private readonly userRepository: UserRepository) {}
 
   async tokenGenerator(user: User): Promise<TokenResponse> {
     const accessToken = await this.generateAccessToken({

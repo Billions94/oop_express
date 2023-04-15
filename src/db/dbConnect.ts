@@ -19,7 +19,7 @@ export class DB {
     try {
       await DB.myDataSource.connect();
       await DB.myDataSource.synchronize();
-      console.log('Connected to database ✅');
+      Logger.info('Connected to database ✅');
     } catch (e) {
       Logger.error(e.message);
     }

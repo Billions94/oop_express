@@ -1,50 +1,66 @@
 import { SpaceService } from '../service/spaceService';
 import { Service } from 'typedi';
-import { Router } from 'express';
 import { User } from '../../user/entity/user';
+import { Inject } from 'typescript-ioc';
+import {
+  ContextRequest,
+  DELETE,
+  GET,
+  PATCH,
+  Path,
+  PathParam,
+  POST,
+} from 'typescript-rest';
+import { Request, Router } from 'express';
+import { SpaceInput } from '../interfaces/spaceInput';
 
 @Service()
+@Path('/api/spaces')
 export class SpaceController {
-  private readonly router: Router;
+  @Inject private readonly spaceService: SpaceService;
 
-  constructor(private readonly spaceService: SpaceService) {
-    this.router = Router();
+  @GET
+  async getSpaces() {
+    return await this.spaceService.getSpaces();
+  }
+
+  @GET
+  @Path(':id')
+  async getSpaceById(@PathParam('id') id: number) {
+    return await this.spaceService.getSpaceById(id);
+  }
+
+  @POST
+  async createSpace(@ContextRequest { user }: Request, input: SpaceInput) {
+    return await this.spaceService.createSpace(<User>user, input);
+  }
+
+  @PATCH
+  @Path(':id')
+  async updateSpace(@PathParam('id') id: number, update: SpaceInput) {
+    return await this.spaceService.updateSpace(id, update);
+  }
+
+  @PATCH
+  @Path(':id/:userId')
+  async addUserToExistingSpace(
+    @PathParam('id') id: number,
+    @PathParam('userId') userId: number,
+    update: SpaceInput
+  ) {
+    return await this.spaceService.updateSpace(id, update, userId);
+  }
+
+  @DELETE
+  @Path(':id')
+  async deleteSpace(
+    @PathParam('id') id: number,
+    @ContextRequest { user }: Request
+  ) {
+    return await this.spaceService.deleteSpace(id, <User>user);
   }
 
   init() {
-    this.router.post('/', async ({ body, user }, res) => {
-      res.send(await this.spaceService.createSpace(<User>user, body));
-    });
-
-    this.router.get('/', async ({ user }, res) => {
-      console.log(user);
-      res.send(await this.spaceService.getSpaces());
-    });
-
-    this.router.get('/:id', async ({ params }, res) => {
-      res.send(await this.spaceService.getSpaceById(parseInt(params.id)));
-    });
-
-    this.router.patch('/:id', async ({ body, params }, res) => {
-      res.send(await this.spaceService.updateSpace(parseInt(params.id), body));
-    });
-
-    this.router.patch('/:id/:userId', async ({ body, params }, res) => {
-      res.send(
-        await this.spaceService.updateSpace(
-          parseInt(params.id),
-          body,
-          parseInt(params.userId)
-        )
-      );
-    });
-
-    this.router.delete('/:id', async ({ params, user }, res) => {
-      res.send(
-        await this.spaceService.deleteSpace(parseInt(params.id), <User>user)
-      );
-    });
-
-    return this.router;
+    return Router()
   }
 }

@@ -12,13 +12,14 @@ import { Service } from 'typedi';
 import { DeleteUserResponse } from '../interfaces/deleteUserResponse';
 import { userResponseMapper } from '../mapper/response/userResponseMapper';
 import { userRequestMapper } from '../mapper/request/userRequestMapper';
+import { Inject } from 'typescript-ioc';
 
 @Service()
 export class UserService implements UserServiceInterface {
-  constructor(
-    private readonly userRepository: UserRepository,
-    private readonly jwtAuthService: JwtAuthService
-  ) {}
+  @Inject
+  private readonly userRepository: UserRepository;
+  @Inject
+  private readonly jwtAuthService: JwtAuthService;
 
   async createUser(userInput: UserInput): Promise<Partial<CreateUserResponse>> {
     try {

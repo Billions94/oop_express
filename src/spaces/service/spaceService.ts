@@ -11,12 +11,13 @@ import { User } from '../../user/entity/user';
 import { removeUserSensitiveInfo } from '../mapper/response/removeUserSensitiveInfo';
 import { spaceRequestMapper } from '../mapper/request/spaceRequestMapper';
 import Logger from '../../utils/log/Logger';
+import { Inject } from 'typescript-ioc';
 
 @Service()
 export class SpaceService {
   constructor(
-    private readonly spaceRepository: SpaceRepository,
-    private readonly userRepository: UserRepository
+    @Inject private readonly spaceRepository: SpaceRepository,
+    @Inject private readonly userRepository: UserRepository
   ) {}
 
   async createSpace(

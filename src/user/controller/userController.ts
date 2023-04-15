@@ -1,41 +1,52 @@
-import { Router } from 'express';
-import { setCache } from '../../cache/cache';
 import { UserService } from '../service/userService';
 import { Service } from 'typedi';
+import { GET, Path, PathParam, POST, PATCH, DELETE } from 'typescript-rest';
+import { Inject } from 'typescript-ioc';
+import { UserInput } from '../interfaces/userInput';
+import { Router } from 'express';
 
 @Service()
+@Path('/api/users')
 export class UserController {
-  private readonly router: Router;
+  @Inject
+  private readonly userService: UserService;
 
-  constructor(private readonly userService: UserService) {
-    this.router = Router();
+  @GET
+  async getUsers() {
+    return this.userService.getUsers();
+  }
+
+  @GET
+  @Path(':id')
+  async getUserById(@PathParam('id') id: number) {
+    return this.userService.getUserById(id);
+  }
+
+  @POST
+  @Path('/register')
+  async registerUser(input: UserInput) {
+    return this.userService.createUser(input);
+  }
+
+  @POST
+  @Path('/login')
+  async loginUser(input: { email: string; password: string }) {
+    return this.userService.login(input.email, input.password);
+  }
+
+  @PATCH
+  @Path(':id')
+  async updateUser(@PathParam('id') id: number, input: UserInput) {
+    return this.userService.updateUser(id, input);
+  }
+
+  @DELETE
+  @Path(':id')
+  async deleteUser(@PathParam('id') id: number) {
+    return this.userService.deleteUser(id);
   }
 
   init() {
-    this.router.post('/register', async ({ body }, res) => {
-      res.send(await this.userService.createUser(body));
-    });
-
-    this.router.post('/login', async ({ body }, res) => {
-      res.send(await this.userService.login(body.email, body.password));
-    });
-
-    this.router.get('/', setCache('30 seconds'), async (_req, res) => {
-      res.send(await this.userService.getUsers());
-    });
-
-    this.router.get('/:id', setCache('30 seconds'), async ({ params }, res) => {
-      res.send(await this.userService.getUserById(parseInt(params.id)));
-    });
-
-    this.router.patch('/:id', async ({ body, params }, res) => {
-      res.send(await this.userService.updateUser(parseInt(params.id), body));
-    });
-
-    this.router.delete('/:id', async ({ params }, res) => {
-      res.send(await this.userService.deleteUser(parseInt(params.id)));
-    });
-
-    return this.router;
+    return Router()
   }
 }

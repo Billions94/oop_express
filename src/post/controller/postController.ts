@@ -1,38 +1,55 @@
 import { PostService } from '../service/postService';
-import { Router } from 'express';
+import { Request, Router } from 'express';
+import { Service } from 'typedi';
+import { Inject } from 'typescript-ioc';
+import {
+  ContextRequest,
+  DELETE,
+  GET,
+  PATCH,
+  Path,
+  PathParam,
+  POST,
+} from 'typescript-rest';
+import { Post } from '../entity/post';
+import { PostInput } from '../interfaces/postInput';
 import { User } from '../../user/entity/user';
-import { Container, Service } from 'typedi';
-import { setCache } from '../../cache/cache';
 
 @Service()
+@Path('/api/posts')
 export class PostController {
-  private readonly router: Router;
+  @Inject
+  private readonly postService: PostService;
 
-  constructor(private readonly postService: PostService) {
-    this.router = Router();
+  @GET
+  async getPosts(): Promise<Post[]> {
+    return await this.postService.getAllPosts();
+  }
+
+  @GET
+  @Path(':id')
+  async getPostById(@PathParam('id') id: number) {
+    return await this.postService.getPostById(id);
+  }
+
+  @POST
+  async createPost(@ContextRequest { user }: Request, input: PostInput) {
+    return await this.postService.createPost(input, <User>user);
+  }
+
+  @PATCH
+  @Path(':id')
+  async updatePost(@PathParam('id') id: number, update: PostInput) {
+    return await this.postService.updatePost(id, update);
+  }
+
+  @DELETE
+  @Path(':id')
+  async deletePost(@PathParam('id') id: number) {
+    return await this.postService.deletePost(id);
   }
 
   init() {
-    this.router.post('/', async ({ body, user }, res) => {
-      res.send(await this.postService.createPost(body, <User>user));
-    });
-
-    this.router.get('/', setCache('30 seconds'), async (_req, res) => {
-      res.send(await this.postService.getAllPosts());
-    });
-
-    this.router.get('/:id', setCache('30 seconds'), async ({ params }, res) => {
-      res.send(await this.postService.getPostById(parseInt(params.id)));
-    });
-
-    this.router.patch('/:id', async ({ body, params }, res) => {
-      res.send(await this.postService.updatePost(parseInt(params.id), body));
-    });
-
-    this.router.delete('/:id', async ({ params }, res) => {
-      res.send(await this.postService.deletePost(parseInt(params.id)));
-    });
-
-    return this.router;
+    return Router()
   }
 }

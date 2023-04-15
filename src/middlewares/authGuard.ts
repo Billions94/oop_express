@@ -8,6 +8,7 @@ import { User as ExpressUser } from '../user/entity/user';
 declare global {
   namespace Express {
     interface Request {
+      // @ts-ignore
       user?: ExpressUser;
     }
   }

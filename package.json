@@ -38,7 +38,9 @@
     "ts-node": "^10.9.1",
     "typedi": "^0.10.0",
     "typeorm": "^0.3.13",
-    "typescript-rest": "^3.0.4"
+    "typescript-ioc": "^3.2.2",
+    "typescript-rest": "^3.0.4",
+    "typescript-rest-ioc": "^1.0.1"
   },
   "prettier": {
     "trailingComma": "es5",
