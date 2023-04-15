@@ -17,7 +17,7 @@ export class CredentialManager {
    * @returns A promise of type <User | null | undefined>.
    * @beta
    */
-  static async verifyCredentials(email: string, password: string) {
+  public static async verifyCredentials(email: string, password: string) {
     const user = await CredentialManager.userRepository.findByEmail(email);
 
     if (user) {

@@ -4,7 +4,7 @@ import Logger from '../utils/log/logger';
 
 export class DB {
   public static myDataSource = new DataSource(ORMConfig);
-  static async connect(onError: Function, next?: Function): Promise<void> {
+  public static async connect(onError: Function, next?: Function): Promise<void> {
     try {
       await DB.init();
       if (next) {
@@ -15,13 +15,13 @@ export class DB {
     }
   }
 
-  static async init(): Promise<void> {
+  private static async init(): Promise<void> {
     try {
-      await DB.myDataSource.connect();
+      await DB.myDataSource.initialize();
       await DB.myDataSource.synchronize();
       Logger.info('Connected to database ✅');
     } catch (e) {
       Logger.error(e.message);
     }
-  };
+  }
 }

@@ -1,9 +1,8 @@
 import { UserService } from '../service/userService';
 import { Service } from 'typedi';
-import { GET, Path, PathParam, POST, PATCH, DELETE } from 'typescript-rest';
 import { Inject } from 'typescript-ioc';
 import { UserInput } from '../interfaces/userInput';
-import { Router } from 'express';
+import { GET, Path, PathParam, POST, PATCH, DELETE } from 'typescript-rest';
 
 @Service()
 @Path('api/users')
@@ -44,9 +43,5 @@ export class UserController {
   @Path(':id')
   async deleteUser(@PathParam('id') id: number) {
     return this.userService.deleteUser(id);
-  }
-
-  init() {
-    return Router()
   }
 }

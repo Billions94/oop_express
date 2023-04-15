@@ -11,7 +11,7 @@ import {
   PathParam,
   POST,
 } from 'typescript-rest';
-import { Request, Router } from 'express';
+import { Request } from 'express';
 import { SpaceInput } from '../interfaces/spaceInput';
 
 @Service()
@@ -58,9 +58,5 @@ export class SpaceController {
     @ContextRequest { user }: Request
   ) {
     return await this.spaceService.deleteSpace(id, <User>user);
-  }
-
-  init() {
-    return Router()
   }
 }

@@ -1,5 +1,5 @@
 import { PostService } from '../service/postService';
-import { Request, Router } from 'express';
+import { Request } from 'express';
 import { Service } from 'typedi';
 import { Inject } from 'typescript-ioc';
 import {
@@ -23,33 +23,29 @@ export class PostController {
 
   @GET
   async getPosts(): Promise<Post[]> {
-    return await this.postService.getAllPosts();
+    return this.postService.getAllPosts();
   }
 
   @GET
   @Path(':id')
   async getPostById(@PathParam('id') id: number) {
-    return await this.postService.getPostById(id);
+    return this.postService.getPostById(id);
   }
 
   @POST
   async createPost(@ContextRequest { user }: Request, input: PostInput) {
-    return await this.postService.createPost(input, <User>user);
+    return this.postService.createPost(input, <User>user);
   }
 
   @PATCH
   @Path(':id')
   async updatePost(@PathParam('id') id: number, update: PostInput) {
-    return await this.postService.updatePost(id, update);
+    return this.postService.updatePost(id, update);
   }
 
   @DELETE
   @Path(':id')
   async deletePost(@PathParam('id') id: number) {
-    return await this.postService.deletePost(id);
-  }
-
-  init() {
-    return Router()
+    return this.postService.deletePost(id);
   }
 }

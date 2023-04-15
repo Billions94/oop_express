@@ -9,12 +9,15 @@ import requireUser from './middlewares/requireUser';
 import Logger from './utils/log/logger';
 import dotenv from 'dotenv';
 import * as process from 'process';
+import { Inject } from 'typescript-ioc';
 
-dotenv.config()
+dotenv.config();
 
 class App {
   private readonly server: Express;
   private readonly PORT = parseInt(<string>process.env.PORT);
+  @Inject
+  private readonly routes: Routes;
 
   constructor() {
     this.server = express();
@@ -30,10 +33,10 @@ class App {
     this.server.use(async (req, res, next) => {
       await DB.connect(
         () =>
-          res.send(
-            { error: 'Database connection error, please try again later' },
-          ),
-        next,
+          res.send({
+            error: 'Database connection error, please try again later',
+          }),
+        next
       );
     });
 
@@ -48,7 +51,7 @@ class App {
   }
 
   private loadRoutes(): void {
-    new Routes(this.server).initialize();
+    this.routes.initialize(this.server);
   }
 }
 
