@@ -6,7 +6,7 @@ import { UserInput } from '../interfaces/userInput';
 import { Router } from 'express';
 
 @Service()
-@Path('/api/users')
+@Path('api/users')
 export class UserController {
   @Inject
   private readonly userService: UserService;
@@ -23,13 +23,13 @@ export class UserController {
   }
 
   @POST
-  @Path('/register')
+  @Path('register')
   async registerUser(input: UserInput) {
     return this.userService.createUser(input);
   }
 
   @POST
-  @Path('/login')
+  @Path('login')
   async loginUser(input: { email: string; password: string }) {
     return this.userService.login(input.email, input.password);
   }

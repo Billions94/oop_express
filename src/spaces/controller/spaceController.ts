@@ -15,7 +15,7 @@ import { Request, Router } from 'express';
 import { SpaceInput } from '../interfaces/spaceInput';
 
 @Service()
-@Path('/api/spaces')
+@Path('api/spaces')
 export class SpaceController {
   @Inject private readonly spaceService: SpaceService;
 

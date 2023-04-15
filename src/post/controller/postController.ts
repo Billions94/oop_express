@@ -16,7 +16,7 @@ import { PostInput } from '../interfaces/postInput';
 import { User } from '../../user/entity/user';
 
 @Service()
-@Path('/api/posts')
+@Path('api/posts')
 export class PostController {
   @Inject
   private readonly postService: PostService;
