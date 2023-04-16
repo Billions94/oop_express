@@ -5,9 +5,10 @@ import { SpaceController } from '../spaces/controller/spaceController';
 import { Server } from 'typescript-rest';
 import { Inject } from 'typescript-ioc';
 import { Health } from '../health/health';
+import listEndpoints from 'express-list-endpoints';
 
 /**
- * Class for handling the routers and controllers
+ * Class for handling routers and controllers
  */
 export class Routes {
   @Inject
@@ -22,7 +23,7 @@ export class Routes {
   /**
    * @remarks This is a custom method.
    * Creates routes for all classes we annotate with decorators from typescript-rest
-   * and utilizes all our controllers we specify in the patterns
+   * and utilizes all controllers specified in the patterns param in the loadControllers method
    * @param server - Express Application Server.
    * @returns A of type of void.
    * @beta
@@ -31,5 +32,6 @@ export class Routes {
     const router = Router();
     Server.buildServices(server);
     Server.loadControllers(router, 'controller/*', __dirname);
+    console.table(listEndpoints(server))
   }
 }

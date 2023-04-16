@@ -1,12 +1,13 @@
 import { UserRepository } from '../../user/repository/userRepository';
 import bcryptService from 'bcrypt';
-import { Container } from 'typedi';
+import { Inject } from 'typescript-ioc';
 
 /**
  * Credential manager for verifying User entities credentials
  */
 export class CredentialManager {
-  private static userRepository: UserRepository = Container.get(UserRepository);
+  @Inject
+  private static userRepository: UserRepository;
 
   /**
    * @remarks This is a custom method.

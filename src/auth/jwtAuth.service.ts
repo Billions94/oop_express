@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+import { config } from 'dotenv';
 import * as process from 'process';
 import jwtService from 'jsonwebtoken';
 import bcryptService from 'bcrypt';
@@ -13,8 +13,7 @@ import {
 } from './interface/jwtAuthInterface';
 import { Inject } from 'typescript-ioc';
 
-dotenv.config();
-
+config({ path: '.env' });
 @Service()
 export class JwtAuthService {
   private readonly JWT_ACCESS_TOKEN_SECRET_KEY = <string>(

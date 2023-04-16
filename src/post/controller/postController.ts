@@ -1,6 +1,5 @@
 import { PostService } from '../service/postService';
 import { Request } from 'express';
-import { Service } from 'typedi';
 import { Inject } from 'typescript-ioc';
 import {
   ContextRequest,
@@ -15,7 +14,6 @@ import { Post } from '../entity/post';
 import { PostInput } from '../interfaces/postInput';
 import { User } from '../../user/entity/user';
 
-@Service()
 @Path('api/posts')
 export class PostController {
   @Inject

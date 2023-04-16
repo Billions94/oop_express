@@ -7,12 +7,11 @@ import Requestlogger from './utils/log/RequestLogger';
 import authGuard from './middlewares/authGuard';
 import requireUser from './middlewares/requireUser';
 import Logger from './utils/log/logger';
-import dotenv from 'dotenv';
+import { config } from 'dotenv';
 import * as process from 'process';
 import { Inject } from 'typescript-ioc';
 
-dotenv.config();
-
+config({ path: '.env' });
 class App {
   private readonly server: Express;
   private readonly PORT = parseInt(<string>process.env.PORT);

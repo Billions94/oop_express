@@ -13,6 +13,7 @@ import { DeleteUserResponse } from '../interfaces/deleteUserResponse';
 import { userResponseMapper } from '../mapper/response/userResponseMapper';
 import { userRequestMapper } from '../mapper/request/userRequestMapper';
 import { Inject } from 'typescript-ioc';
+import Logger from '../../utils/log/Logger';
 
 @Service()
 export class UserService implements UserServiceInterface {
@@ -40,6 +41,7 @@ export class UserService implements UserServiceInterface {
         },
       };
     } catch (e) {
+      Logger.info(e.message);
       return {
         statusCode: e.statusCode,
         errorMessage: e.message,
@@ -78,6 +80,24 @@ export class UserService implements UserServiceInterface {
 
       return { statusCode: 200, data: { user } };
     } catch (e) {
+      Logger.info(e.message);
+      return {
+        statusCode: e.statusCode,
+        errorMessage: e.message,
+        data: { user: null },
+      };
+    }
+  }
+
+  async getLoggedInUser(user: User): Promise<Partial<UserResponse>> {
+    try {
+      return {
+        statusCode: 200,
+        message: 'success',
+        data: { user: userResponseMapper(user) }
+      };
+    } catch (e) {
+      Logger.info(e.message);
       return {
         statusCode: e.statusCode,
         errorMessage: e.message,
@@ -104,6 +124,7 @@ export class UserService implements UserServiceInterface {
         data: { user },
       };
     } catch (e) {
+      Logger.info(e.message);
       return {
         statusCode: e.statusCode,
         errorMessage: e.message,
@@ -120,6 +141,7 @@ export class UserService implements UserServiceInterface {
       await this.userRepository.deleteById(id);
       return { statusCode: 200, success: true };
     } catch (e) {
+      Logger.info(e.message);
       return {
         statusCode: e.statusCode,
         success: false,

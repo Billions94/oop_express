@@ -1,10 +1,10 @@
 import { UserService } from '../service/userService';
-import { Service } from 'typedi';
 import { Inject } from 'typescript-ioc';
 import { UserInput } from '../interfaces/userInput';
-import { GET, Path, PathParam, POST, PATCH, DELETE } from 'typescript-rest';
+import { GET, Path, PathParam, POST, PATCH, DELETE, ContextRequest } from 'typescript-rest';
+import { Request } from 'express';
+import { User } from '../entity/user';
 
-@Service()
 @Path('api/users')
 export class UserController {
   @Inject
@@ -19,6 +19,12 @@ export class UserController {
   @Path(':id')
   async getUserById(@PathParam('id') id: number) {
     return this.userService.getUserById(id);
+  }
+
+  @GET
+  @Path('me')
+  async getLoggedInUser(@ContextRequest { user }: Request) {
+    return this.userService.getLoggedInUser(<User>user);
   }
 
   @POST

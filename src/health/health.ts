@@ -1,5 +1,5 @@
 import { GET, Path } from 'typescript-rest';
-import { resOK } from './index';
+import { resError, resOK } from './index';
 
 @Path('/api/health')
 export class Health {
@@ -11,12 +11,16 @@ export class Health {
    */
   @GET
   check() {
-    const data = {
-      uptime: process.uptime(),
-      message: 'Ok',
-      date: new Date(),
-    };
+    try {
+      const data = {
+        uptime: process.uptime(),
+        message: 'Ok',
+        date: new Date(),
+      };
 
-    return resOK({ data });
+      return resOK({ data });
+    } catch (e) {
+      return resError(e.message)
+    }
   }
 }

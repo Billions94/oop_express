@@ -1,5 +1,4 @@
 import { SpaceService } from '../service/spaceService';
-import { Service } from 'typedi';
 import { User } from '../../user/entity/user';
 import { Inject } from 'typescript-ioc';
 import {
@@ -14,31 +13,30 @@ import {
 import { Request } from 'express';
 import { SpaceInput } from '../interfaces/spaceInput';
 
-@Service()
 @Path('api/spaces')
 export class SpaceController {
   @Inject private readonly spaceService: SpaceService;
 
   @GET
   async getSpaces() {
-    return await this.spaceService.getSpaces();
+    return this.spaceService.getSpaces();
   }
 
   @GET
   @Path(':id')
   async getSpaceById(@PathParam('id') id: number) {
-    return await this.spaceService.getSpaceById(id);
+    return this.spaceService.getSpaceById(id);
   }
 
   @POST
   async createSpace(@ContextRequest { user }: Request, input: SpaceInput) {
-    return await this.spaceService.createSpace(<User>user, input);
+    return this.spaceService.createSpace(<User>user, input);
   }
 
   @PATCH
   @Path(':id')
   async updateSpace(@PathParam('id') id: number, update: SpaceInput) {
-    return await this.spaceService.updateSpace(id, update);
+    return this.spaceService.updateSpace(id, update);
   }
 
   @PATCH
@@ -48,7 +46,7 @@ export class SpaceController {
     @PathParam('userId') userId: number,
     update: SpaceInput
   ) {
-    return await this.spaceService.updateSpace(id, update, userId);
+    return this.spaceService.updateSpace(id, update, userId);
   }
 
   @DELETE
@@ -57,6 +55,6 @@ export class SpaceController {
     @PathParam('id') id: number,
     @ContextRequest { user }: Request
   ) {
-    return await this.spaceService.deleteSpace(id, <User>user);
+    return this.spaceService.deleteSpace(id, <User>user);
   }
 }

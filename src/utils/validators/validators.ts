@@ -1,19 +1,19 @@
 import { UserInput } from '../../user/interfaces/userInput';
 import { UserRepository } from '../../user/repository/userRepository';
-import { Container } from 'typedi';
 import { CustomError } from '../../error/customError';
 import { SpaceRepository } from '../../spaces/repository/spaceRepository';
 import { PostRepository } from '../../post/repository/postRepository';
 import { PostInput } from '../../post/interfaces/postInput';
 import { SpaceInput } from '../../spaces/interfaces/spaceInput';
+import { Inject } from 'typescript-ioc';
 
 export class Validator {
-  private static readonly userRepository: UserRepository =
-    Container.get(UserRepository);
-  private static readonly postRepository: PostRepository =
-    Container.get(PostRepository);
-  private static readonly spaceRepository: SpaceRepository =
-    Container.get(SpaceRepository);
+  @Inject
+  private static readonly userRepository: UserRepository
+  @Inject
+  private static readonly postRepository: PostRepository
+  @Inject
+  private static readonly spaceRepository: SpaceRepository
 
   /**
    * @remarks This is a custom method.
