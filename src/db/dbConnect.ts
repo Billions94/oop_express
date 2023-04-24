@@ -3,13 +3,14 @@ import ORMConfig from '../ormconfig';
 import Logger from '../utils/log/logger';
 
 export class DB {
-  public static myDataSource = new DataSource(ORMConfig);
-  public static async connect(onError: Function, next?: Function): Promise<void> {
+  public static dataSource = new DataSource(ORMConfig);
+  public static async connect(
+    onError: Function,
+    next?: Function
+  ): Promise<void> {
     try {
       await DB.init();
-      if (next) {
-        next();
-      }
+      if (next) next();
     } catch (e) {
       onError();
     }
@@ -17,9 +18,11 @@ export class DB {
 
   private static async init(): Promise<void> {
     try {
-      await DB.myDataSource.initialize();
-      await DB.myDataSource.synchronize();
-      Logger.info('Connected to database ✅');
+      if (!DB.dataSource.isInitialized) {
+        await DB.dataSource.initialize();
+        await DB.dataSource.synchronize();
+        Logger.info('Connected to database ✅');
+      }
     } catch (e) {
       Logger.error(e.message);
     }

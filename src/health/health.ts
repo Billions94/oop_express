@@ -12,15 +12,13 @@ export class Health {
   @GET
   check() {
     try {
-      const data = {
+      return resOK({
         uptime: process.uptime(),
-        message: 'Ok',
+        message: 'OK',
         date: new Date(),
-      };
-
-      return resOK({ data });
+      });
     } catch (e) {
-      return resError(e.message)
+      return resError(e.message);
     }
   }
 }

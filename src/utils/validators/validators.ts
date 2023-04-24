@@ -9,11 +9,11 @@ import { Inject } from 'typescript-ioc';
 
 export class Validator {
   @Inject
-  private static readonly userRepository: UserRepository
+  private static readonly userRepository: UserRepository;
   @Inject
-  private static readonly postRepository: PostRepository
+  private static readonly postRepository: PostRepository;
   @Inject
-  private static readonly spaceRepository: SpaceRepository
+  private static readonly spaceRepository: SpaceRepository;
 
   /**
    * @remarks This is a custom method.
@@ -26,8 +26,7 @@ export class Validator {
     if (input.name.trim().length <= 0)
       throw new Error('Name field cannot be empty');
 
-    if (input.age <= 0)
-      throw new Error('Age field cannot be zero or negative');
+    if (input.age <= 0) throw new Error('Age field cannot be zero or negative');
 
     if (input.email.trim().length <= 0)
       throw new Error('Email field cannot be empty');
@@ -75,10 +74,7 @@ export class Validator {
    * @returns A promise of type void.
    */
   public static async isExistsByEmail(email: string): Promise<void> {
-    const existingEmail = (await Validator.userRepository.isExistByEmail(email))
-      ?.email;
-
-    if (existingEmail === email)
+    if ((await this.userRepository.isExistByEmail(email))?.email === email)
       throw new Error('Email already exists');
   }
 
@@ -86,9 +82,9 @@ export class Validator {
    * @remarks This is a custom method.
    * Throws an error for an entity passed as param, if they do not exist.
    * The id has to be from the entity passed as matcher.
-   * @param id - Identifier for the entity eg. x.id, with x being the entity.
+   * @param id - Identifier for the entity e.g. x.id, with x being the entity.
    * @param matcher - Matcher or alias for the entity in lowercase
-   * eg. 'user' or 'post' or 'space'
+   * e.g. 'user' or 'post' or 'space'
    * @returns A promise of type void.
    * @beta
    */

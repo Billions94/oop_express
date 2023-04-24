@@ -13,10 +13,10 @@ import { Inject } from 'typescript-ioc';
 
 config({ path: '.env' });
 class App {
-  private readonly server: Express;
-  private readonly PORT = parseInt(<string>process.env.PORT);
   @Inject
   private readonly routes: Routes;
+  private readonly server: Express;
+  private readonly PORT = parseInt(<string>process.env.PORT);
 
   constructor() {
     this.server = express();

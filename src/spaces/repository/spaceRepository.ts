@@ -7,7 +7,7 @@ import { User } from '../../user/entity/user';
 @Service()
 export class SpaceRepository extends Repository<Space> {
   constructor() {
-    super(Space, DB.myDataSource.createEntityManager());
+    super(Space, DB.dataSource.createEntityManager());
   }
 
   async findById(id: number): Promise<Space> {

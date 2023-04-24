@@ -15,7 +15,8 @@ import { SpaceInput } from '../interfaces/spaceInput';
 
 @Path('api/spaces')
 export class SpaceController {
-  @Inject private readonly spaceService: SpaceService;
+  @Inject
+  private readonly spaceService: SpaceService;
 
   @GET
   async getSpaces() {

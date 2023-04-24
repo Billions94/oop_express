@@ -13,7 +13,6 @@ import {
 } from 'typeorm';
 import { Post } from '../../post/entity/post';
 import { Space } from '../../spaces/entity/space';
-import bcryptService from 'bcrypt';
 
 @Entity({ name: 'user' })
 export class User {
@@ -45,18 +44,6 @@ export class User {
   updatedAt: Date;
   @DeleteDateColumn()
   deletedAt: Date;
-
-  constructor();
-  constructor(name: string);
-  constructor(name: string, age: number);
-  constructor(name: string, age: number, email: string);
-  constructor(name?: string, age?: number, email?: string, password?: string);
-  constructor(name?: string, age?: number, email?: string, password?: string) {
-    this.name = <string>name;
-    this.age = <number>age;
-    this.email = <string>email;
-    this.password = <string>password;
-  }
 
   @BeforeInsert()
   updateCreatedAt() {

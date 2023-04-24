@@ -113,9 +113,10 @@ export class UserService implements UserServiceInterface {
     try {
       await Validator.throwErrorIfNotExist(id, 'user');
       await this.userRepository.update(id, userInput);
-      const user = <User>(
-        await this.userRepository.findById(id).then(userResponseMapper)
-      );
+
+      const user = <User>(await this.userRepository
+                  .findById(id)
+                  .then(userResponseMapper));
       await this.userRepository.save(user);
 
       return {

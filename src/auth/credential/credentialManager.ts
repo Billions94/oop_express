@@ -1,13 +1,13 @@
 import { UserRepository } from '../../user/repository/userRepository';
 import bcryptService from 'bcrypt';
-import { Inject } from 'typescript-ioc';
+import { Container } from 'typedi';
 
 /**
  * Credential manager for verifying User entities credentials
  */
 export class CredentialManager {
-  @Inject
-  private static userRepository: UserRepository;
+  private static readonly userRepository: UserRepository =
+    Container.get(UserRepository);
 
   /**
    * @remarks This is a custom method.
@@ -19,14 +19,11 @@ export class CredentialManager {
    * @beta
    */
   public static async verifyCredentials(email: string, password: string) {
-    const user = await CredentialManager.userRepository.findByEmail(email);
+    const user = await this.userRepository.findByEmail(email);
 
     if (user) {
-      if (await bcryptService.compare(password, user.password)) {
-        return user;
-      } else {
-        return null;
-      }
+      if (await bcryptService.compare(password, user.password)) return user;
+      else return null;
     }
   }
 }
