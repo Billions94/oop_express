@@ -2,7 +2,6 @@ import { User } from '../entity/user';
 import { UserInput } from './userInput';
 import { CreateUserResponse } from './createUserResponse';
 import { UserResponse } from './userResponse';
-import { DeleteResult } from 'typeorm';
 import { LoginResponse } from './loginResponse';
 import { DeleteUserResponse } from './deleteUserResponse';
 

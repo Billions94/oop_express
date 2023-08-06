@@ -1,7 +1,7 @@
 import { Space } from '../../entity/space';
 
 export function removeUserSensitiveInfo(space: Space): void {
-  space.users.forEach(user => {
+  space.members.forEach(user => {
     // @ts-ignore
     delete user.password;
     // @ts-ignore

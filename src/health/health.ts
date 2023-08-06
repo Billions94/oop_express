@@ -1,10 +1,8 @@
 import { GET, Path } from 'typescript-rest';
-import { resOK } from './index';
+import { resError, resOK } from './index';
 
-const version = require('../../package.json');
-
-@Path('/')
-class Health {
+@Path('/api/health')
+export class Health {
   /**
    * Getting basic health status and current API version information with a simple GET request
    * This is mainly used for automated CI/CD deployments and basic service health checks over
@@ -12,10 +10,15 @@ class Health {
    * defined in package.json file
    */
   @GET
-  index(): { status: string; version: string } {
-    return resOK({
-      status: 'ok',
-      version: version,
-    });
+  check() {
+    try {
+      return resOK({
+        uptime: process.uptime(),
+        message: 'OK',
+        date: new Date(),
+      });
+    } catch (e) {
+      return resError(e.message);
+    }
   }
 }

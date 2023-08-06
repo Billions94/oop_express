@@ -11,12 +11,14 @@ import { User } from '../../user/entity/user';
 import { removeUserSensitiveInfo } from '../mapper/response/removeUserSensitiveInfo';
 import { spaceRequestMapper } from '../mapper/request/spaceRequestMapper';
 import Logger from '../../utils/log/Logger';
+import { Inject } from 'typescript-ioc';
+import { spaceResponseMapper } from '../mapper/response/spaceResponseMapper';
 
 @Service()
 export class SpaceService {
   constructor(
-    private readonly spaceRepository: SpaceRepository,
-    private readonly userRepository: UserRepository
+    @Inject private readonly spaceRepository: SpaceRepository,
+    @Inject private readonly userRepository: UserRepository
   ) {}
 
   async createSpace(
@@ -31,7 +33,7 @@ export class SpaceService {
       const space = spaceRequestMapper(input, user);
       await this.spaceRepository.save(space);
 
-      user.spaces = [...user.spaces, space];
+      space.members = [...space.members, user];
       await this.userRepository.save(user);
       return {
         statusCode: 201,
@@ -39,7 +41,7 @@ export class SpaceService {
         data: { id: space.id },
       };
     } catch (e) {
-      Logger.info(e)
+      Logger.info(e);
       return {
         statusCode: e.statusCode,
         message: e.message,
@@ -52,12 +54,12 @@ export class SpaceService {
     try {
       if (!this.spaceRepository) return [];
 
-      const spaces = await this.spaceRepository.findAndIncludeUserRelation();
+      const spaces = await this.spaceRepository.find();
       spaces.map(removeUserSensitiveInfo);
-      return spaces;
+      return spaces.map(spaceResponseMapper);
     } catch (e) {
-      Logger.info(e.message)
-      return []
+      Logger.info(e.message);
+      return [];
     }
   }
 
@@ -67,14 +69,16 @@ export class SpaceService {
         return { message: 'Space repository not found' };
 
       await Validator.throwErrorIfNotExist(id, 'space');
-      const space = await this.spaceRepository.findById(id);
+      const space = await this.spaceRepository
+        .findById(id)
+        .then(spaceResponseMapper);
       return {
         statusCode: 200,
         message: 'Space retrieved successfully',
         data: { space },
       };
     } catch (e) {
-      Logger.info(e)
+      Logger.info(e);
       return {
         statusCode: e.statusCode,
         message: e.message,
@@ -85,28 +89,18 @@ export class SpaceService {
 
   async updateSpace(
     id: number,
-    update: SpaceInput,
-    userId?: number
+    update: SpaceInput
   ): Promise<Partial<SpaceResponse>> {
     try {
       if (!this.spaceRepository)
         return { message: 'Space repository not found' };
 
       await Validator.throwErrorIfNotExist(id, 'space');
-      const space = await this.spaceRepository.findById(id);
-      space.name = update.name;
-      if (!update.isActive) {
-        space.isActive = update.isActive;
-      } else {
-        space.isActive = true;
-      }
-      await this.spaceRepository.save(space);
+      await this.spaceRepository.updateSpace(id, update);
+      const space = await this.spaceRepository
+        .findById(id)
+        .then(spaceResponseMapper);
 
-      if (userId) {
-        const user = await this.userRepository.findById(<number>userId);
-        await this.spaceRepository.customUpdateBuilder(space, update, user);
-        await this.userRepository.save(user);
-      }
       return {
         statusCode: 203,
         message: 'Space updated successfully',
@@ -121,16 +115,35 @@ export class SpaceService {
     }
   }
 
-  async deleteSpace(
-    id: number,
-    user: User
-  ): Promise<Partial<DeleteSpaceResponse>> {
+  async addMembersToSpace(
+    spaceId: number,
+    userId: number,
+    update: SpaceInput
+  ): Promise<Partial<SpaceResponse>> {
+    try {
+      const user = await this.userRepository.findById(userId);
+      await this.spaceRepository.customUpdateBuilder(spaceId, user, update);
+      const space = await this.spaceRepository
+        .findById(spaceId)
+        .then(spaceResponseMapper);
+
+      return { statusCode: 203, data: { space } };
+    } catch (e) {
+      return {
+        statusCode: 404,
+        message: e.message,
+        data: { space: null },
+      };
+    }
+  }
+
+  async deleteSpace(id: number): Promise<Partial<DeleteSpaceResponse>> {
     try {
       if (!this.spaceRepository)
         return { message: 'Space repository not found' };
 
       await Validator.throwErrorIfNotExist(id, 'space');
-      await this.spaceRepository.deleteByManyToManyRelations(id, user);
+      await this.spaceRepository.deleteByManyToManyRelations(id);
       return {
         statusCode: 200,
         message: 'Space successfully deleted',
