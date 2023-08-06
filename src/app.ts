@@ -45,7 +45,11 @@ class App {
     (async () => await DB.connect())();
 
     this.server.listen(this.PORT, () => {
-      Logger.info(`Server started on http://localhost:${this.PORT}`);
+      Logger.info(
+        process.env.NODE_ENV === 'production'
+          ? `Server started on https://com2gether.onrender.com`
+          : `Server started on http://localhost:${this.PORT}`
+      );
     });
   }
 

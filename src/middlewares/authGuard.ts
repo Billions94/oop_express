@@ -52,7 +52,6 @@ export class AuthGuard {
 
         if (user) {
           req.user = user;
-          Logger.info(user);
           return next();
         }
       } else if (expired && refreshToken) {
