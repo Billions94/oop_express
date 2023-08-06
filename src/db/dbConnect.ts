@@ -4,19 +4,7 @@ import Logger from '../utils/log/logger';
 
 export class DB {
   public static dataSource = new DataSource(ORMConfig);
-  public static async connect(
-    onError: Function,
-    next?: Function
-  ): Promise<void> {
-    try {
-      await DB.init();
-      if (next) next();
-    } catch (e) {
-      onError();
-    }
-  }
-
-  private static async init(): Promise<void> {
+  public static async connect(): Promise<void> {
     try {
       if (!DB.dataSource.isInitialized) {
         await DB.dataSource.initialize();

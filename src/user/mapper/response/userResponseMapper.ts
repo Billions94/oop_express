@@ -6,8 +6,8 @@ export function userResponseMapper(user: User): User {
     name: user.name,
     age: user.age,
     email: user.email,
-    posts: user.posts ?? [],
     spaces: user.spaces,
+    messages: user.messages,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

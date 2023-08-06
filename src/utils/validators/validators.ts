@@ -1,10 +1,10 @@
 import { UserInput } from '../../user/interfaces/userInput';
 import { UserRepository } from '../../user/repository/userRepository';
 import { CustomError } from '../../error/customError';
-import { SpaceRepository } from '../../spaces/repository/spaceRepository';
+import { SpaceRepository } from '../../space/repository/spaceRepository';
 import { PostRepository } from '../../post/repository/postRepository';
 import { PostInput } from '../../post/interfaces/postInput';
-import { SpaceInput } from '../../spaces/interfaces/spaceInput';
+import { SpaceInput } from '../../space/interfaces/spaceInput';
 import { Inject } from 'typescript-ioc';
 
 export class Validator {

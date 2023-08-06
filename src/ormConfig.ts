@@ -21,7 +21,8 @@ export default {
   entities: [
     `src/user/entity/**/*.${isCompiled ? 'js' : 'ts'}`,
     `src/post/entity/**/*.${isCompiled ? 'js' : 'ts'}`,
-    `src/spaces/entity/**/*.${isCompiled ? 'js' : 'ts'}`,
+    `src/space/entity/**/*.${isCompiled ? 'js' : 'ts'}`,
+    `src/message/entity/**/*.${isCompiled ? 'js' : 'ts'}`,
   ],
   migrations: [
     `src/migration/**/*.${isCompiled ? 'js' : 'ts'}`,

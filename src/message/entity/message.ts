@@ -1,5 +1,6 @@
 import {
-  BeforeInsert, BeforeUpdate,
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   Entity,
   JoinColumn,
@@ -7,17 +8,21 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '../../user/entity/user';
+import { Space } from '../../space/entity/space';
 
-@Entity({ name: 'post' })
-export class Post {
+@Entity({ name: 'message' })
+export class Message {
   @PrimaryGeneratedColumn()
   id: number;
-  @ManyToOne(() => User, (user) => user.posts, { eager: true })
+  @ManyToOne(() => User, (user) => user.messages, { eager: true })
   @JoinColumn({ name: 'user_id' })
   user: User;
-  @Column('text', { name: 'content', nullable: false })
+  @ManyToOne(() => Space, (space) => space.messages)
+  @JoinColumn({ name: 'spaces_id ' })
+  space: Space;
+  @Column('text', { name: 'message', nullable: false })
   content: string;
-  @Column('text', { name: 'media', nullable: true })
+  @Column('text', { name: 'media' })
   media: string;
   @Column('timestamptz', { name: 'created_at', nullable: false })
   createdAt: Date;
@@ -25,12 +30,12 @@ export class Post {
   updatedAt: Date;
 
   @BeforeInsert()
-  updateCreatedAt() {
+  updateCreatedAt(): void {
     this.createdAt = new Date();
   }
 
   @BeforeUpdate()
-  updateUpdatedAt() {
+  updateUpdatedAt(): void {
     this.updatedAt = new Date();
   }
 }

@@ -12,6 +12,7 @@ import {
   RefreshTokenResponse,
 } from './interface/jwtAuthInterface';
 import { Inject } from 'typescript-ioc';
+import Logger from '../utils/log/Logger';
 
 config({ path: '.env' });
 @Service()
@@ -136,21 +137,25 @@ export class JwtAuthService {
   async refreshTokens(
     currentRefreshToken: string
   ): Promise<Partial<RefreshTokenResponse>> {
-    const decodedToken = await this.verifyRefreshToken(currentRefreshToken);
-    const user = await this.userRepository.findById(parseInt(decodedToken.id));
+    try {
+      const decodedToken = await this.verifyRefreshToken(currentRefreshToken);
+      const user = await this.userRepository.findById(
+        parseInt(decodedToken.id)
+      );
 
-    if (!user) throw new Error('User not found');
-
-    if (
-      await bcryptService.compare(
-        currentRefreshToken,
-        <string>user.refreshToken
-      )
-    ) {
-      const { accessToken, refreshToken } = await this.tokenGenerator(user);
-      return { accessToken, refreshToken, user };
-    } else {
-      return { errorMessage: 'Refresh token is invalid' };
+      if (
+        await bcryptService.compare(
+          currentRefreshToken,
+          String(user.refreshToken)
+        )
+      ) {
+        const { accessToken, refreshToken } = await this.tokenGenerator(user);
+        return { accessToken, refreshToken, user };
+      } else {
+        return { errorMessage: 'Refresh token is invalid' };
+      }
+    } catch (err) {
+      return { errorMessage: err.message };
     }
   }
 

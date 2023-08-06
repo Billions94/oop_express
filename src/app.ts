@@ -1,43 +1,48 @@
 import 'reflect-metadata';
+import * as http from 'http';
 import express, { Express } from 'express';
 import cors from 'cors';
 import { DB } from './db/dbConnect';
 import { Routes } from './route/routes';
 import Requestlogger from './utils/log/RequestLogger';
-import authGuard from './middlewares/authGuard';
-import requireUser from './middlewares/requireUser';
+import { AuthGuard } from './middlewares/authGuard';
 import Logger from './utils/log/logger';
 import { config } from 'dotenv';
 import * as process from 'process';
 import { Inject } from 'typescript-ioc';
+import { SocketServer } from './socket/socket';
+import { RequireUserAuth } from './middlewares/requireUser';
 
 config({ path: '.env' });
 class App {
   @Inject
   private readonly routes: Routes;
   private readonly server: Express;
-  private readonly PORT = parseInt(<string>process.env.PORT);
+  private readonly httpServer;
+  private readonly PORT = parseInt(String(process.env.PORT));
+  @Inject
+  private readonly authGuard: AuthGuard;
+  @Inject
+  private readonly requireUser: RequireUserAuth;
 
   constructor() {
     this.server = express();
-    this.server.use(cors());
+    this.httpServer = http.createServer(this.server);
+    this.server.use(cors({ origin: '*' }));
     this.server.use(express.json({ limit: '50mb' }));
     this.server.use(Requestlogger);
+    this.initializeSocketServer();
     this.connect();
     this.activateGuards();
     this.loadRoutes();
   }
 
+  private initializeSocketServer() {
+    new SocketServer(this.httpServer);
+  }
+
   private connect(): void {
-    this.server.use(async (req, res, next) => {
-      await DB.connect(
-        () =>
-          res.send({
-            error: 'Database connection error, please try again later',
-          }),
-        next
-      );
-    });
+    (async () => await DB.connect())();
 
     this.server.listen(this.PORT, () => {
       Logger.info(`Server started on http://localhost:${this.PORT}`);
@@ -45,8 +50,8 @@ class App {
   }
 
   private activateGuards(): void {
-    this.server.use(authGuard);
-    this.server.use(requireUser);
+    this.server.use(this.authGuard.init);
+    this.server.use(this.requireUser.init);
   }
 
   private loadRoutes(): void {

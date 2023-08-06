@@ -6,6 +6,6 @@ export function spaceRequestMapper(spaceInput: SpaceInput, user: User): Space {
   const space = new Space();
   space.name = spaceInput.name;
   space.isActive = true;
-  space.users = [user]
+  space.members = [user]
   return space;
 }

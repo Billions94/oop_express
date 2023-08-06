@@ -1,9 +1,21 @@
 import { UserService } from '../service/userService';
 import { Inject } from 'typescript-ioc';
 import { UserInput } from '../interfaces/userInput';
-import { GET, Path, PathParam, POST, PATCH, DELETE, ContextRequest } from 'typescript-rest';
+import {
+  GET,
+  Path,
+  PathParam,
+  POST,
+  PATCH,
+  DELETE,
+  ContextRequest,
+} from 'typescript-rest';
 import { Request } from 'express';
 import { User } from '../entity/user';
+import { UserResponse } from '../interfaces/userResponse';
+import { CreateUserResponse } from '../interfaces/createUserResponse';
+import { LoginResponse } from '../interfaces/loginResponse';
+import { DeleteUserResponse } from '../interfaces/deleteUserResponse';
 
 @Path('api/users')
 export class UserController {
@@ -11,43 +23,53 @@ export class UserController {
   private readonly userService: UserService;
 
   @GET
-  async getUsers() {
+  async getUsers(): Promise<User[]> {
     return this.userService.getUsers();
   }
 
   @GET
   @Path(':id')
-  async getUserById(@PathParam('id') id: number) {
+  async getUserById(
+    @PathParam('id') id: number
+  ): Promise<Partial<UserResponse>> {
     return this.userService.getUserById(id);
   }
 
   @GET
   @Path('me')
-  async getLoggedInUser(@ContextRequest { user }: Request) {
+  async getLoggedInUser(
+    @ContextRequest { user }: Request
+  ): Promise<Partial<UserResponse>> {
     return this.userService.getLoggedInUser(<User>user);
   }
 
   @POST
   @Path('register')
-  async registerUser(input: UserInput) {
+  async registerUser(input: UserInput): Promise<Partial<CreateUserResponse>> {
     return this.userService.createUser(input);
   }
 
   @POST
   @Path('login')
-  async loginUser(input: { email: string; password: string }) {
+  async loginUser(input: {
+    email: string;
+    password: string;
+  }): Promise<Partial<LoginResponse>> {
     return this.userService.login(input.email, input.password);
   }
 
   @PATCH
   @Path(':id')
-  async updateUser(@PathParam('id') id: number, input: UserInput) {
+  async updateUser(
+    @PathParam('id') id: number,
+    input: UserInput
+  ): Promise<Partial<UserResponse>> {
     return this.userService.updateUser(id, input);
   }
 
   @DELETE
   @Path(':id')
-  async deleteUser(@PathParam('id') id: number) {
+  async deleteUser(@PathParam('id') id: number): Promise<DeleteUserResponse> {
     return this.userService.deleteUser(id);
   }
 }

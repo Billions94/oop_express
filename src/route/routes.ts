@@ -1,11 +1,12 @@
 import { Express, Router } from 'express';
 import { UserController } from '../user/controller/userController';
 import { PostController } from '../post/controller/postController';
-import { SpaceController } from '../spaces/controller/spaceController';
+import { SpaceController } from '../space/controller/spaceController';
 import { Server } from 'typescript-rest';
 import { Inject } from 'typescript-ioc';
 import { Health } from '../health/health';
 import listEndpoints from 'express-list-endpoints';
+import { MessageController } from '../message/controller/messageController';
 
 /**
  * Class for handling routers and controllers
@@ -17,6 +18,8 @@ export class Routes {
   private readonly postController: PostController;
   @Inject
   private readonly spaceController: SpaceController;
+  @Inject
+  private readonly messageController: MessageController;
   @Inject
   private readonly healthCheck: Health;
 

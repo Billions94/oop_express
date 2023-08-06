@@ -79,12 +79,10 @@ export class TestController {
     modifiedUser.email = input.email;
     modifiedUser.posts.push(input.posts);
     modifiedUser.updatedAt = new Date();
-    const mutatedArr = this.inMemoryUsers.filter((u) => u !== modifiedUser);
-    Logger.info(mutatedArr);
-    Logger.info(modifiedUser);
-    mutatedArr.push(modifiedUser);
-    Logger.info(mutatedArr);
-    this.inMemoryUsers = mutatedArr;
+
+    this.inMemoryUsers.filter((u) => u !== modifiedUser);
+    this.inMemoryUsers = [...this.inMemoryUsers, modifiedUser];
+
     return modifiedUser;
   }
 }

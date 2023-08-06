@@ -13,6 +13,9 @@ import {
 import { Post } from '../entity/post';
 import { PostInput } from '../interfaces/postInput';
 import { User } from '../../user/entity/user';
+import { PostResponse } from '../interfaces/postResponse';
+import { CreatePostResponse } from '../interfaces/createPostResponse';
+import { DeletePostResponse } from '../interfaces/deletePostResponse';
 
 @Path('api/posts')
 export class PostController {
@@ -26,24 +29,34 @@ export class PostController {
 
   @GET
   @Path(':id')
-  async getPostById(@PathParam('id') id: number) {
+  async getPostById(
+    @PathParam('id') id: number
+  ): Promise<Partial<PostResponse>> {
     return this.postService.getPostById(id);
   }
 
   @POST
-  async createPost(@ContextRequest { user }: Request, input: PostInput) {
+  async createPost(
+    @ContextRequest { user }: Request,
+    input: PostInput
+  ): Promise<Partial<CreatePostResponse>> {
     return this.postService.createPost(input, <User>user);
   }
 
   @PATCH
   @Path(':id')
-  async updatePost(@PathParam('id') id: number, update: PostInput) {
+  async updatePost(
+    @PathParam('id') id: number,
+    update: PostInput
+  ): Promise<Partial<PostResponse>> {
     return this.postService.updatePost(id, update);
   }
 
   @DELETE
   @Path(':id')
-  async deletePost(@PathParam('id') id: number) {
+  async deletePost(
+    @PathParam('id') id: number
+  ): Promise<Partial<DeletePostResponse>> {
     return this.postService.deletePost(id);
   }
 }

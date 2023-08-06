@@ -12,6 +12,10 @@ import {
 } from 'typescript-rest';
 import { Request } from 'express';
 import { SpaceInput } from '../interfaces/spaceInput';
+import { Space } from '../entity/space';
+import { SpaceResponse } from '../interfaces/spaceResponse';
+import { CreateSpaceResponse } from '../interfaces/createSpaceResponse';
+import { DeleteSpaceResponse } from '../interfaces/deleteSpaceResponse';
 
 @Path('api/spaces')
 export class SpaceController {
@@ -19,35 +23,43 @@ export class SpaceController {
   private readonly spaceService: SpaceService;
 
   @GET
-  async getSpaces() {
+  async getSpaces(): Promise<Space[]> {
     return this.spaceService.getSpaces();
   }
 
   @GET
   @Path(':id')
-  async getSpaceById(@PathParam('id') id: number) {
+  async getSpaceById(
+    @PathParam('id') id: number
+  ): Promise<Partial<SpaceResponse>> {
     return this.spaceService.getSpaceById(id);
   }
 
   @POST
-  async createSpace(@ContextRequest { user }: Request, input: SpaceInput) {
+  async createSpace(
+    @ContextRequest { user }: Request,
+    input: SpaceInput
+  ): Promise<Partial<CreateSpaceResponse>> {
     return this.spaceService.createSpace(<User>user, input);
   }
 
   @PATCH
   @Path(':id')
-  async updateSpace(@PathParam('id') id: number, update: SpaceInput) {
+  async updateSpace(
+    @PathParam('id') id: number,
+    update: SpaceInput
+  ): Promise<Partial<SpaceResponse>> {
     return this.spaceService.updateSpace(id, update);
   }
 
   @PATCH
   @Path(':id/:userId')
-  async addUserToExistingSpace(
+  async addMembersToSpace(
     @PathParam('id') id: number,
     @PathParam('userId') userId: number,
     update: SpaceInput
-  ) {
-    return this.spaceService.updateSpace(id, update, userId);
+  ): Promise<Partial<SpaceResponse>> {
+    return this.spaceService.addMembersToSpace(id, userId, update);
   }
 
   @DELETE
@@ -55,7 +67,7 @@ export class SpaceController {
   async deleteSpace(
     @PathParam('id') id: number,
     @ContextRequest { user }: Request
-  ) {
-    return this.spaceService.deleteSpace(id, <User>user);
+  ): Promise<Partial<DeleteSpaceResponse>> {
+    return this.spaceService.deleteSpace(id);
   }
 }
