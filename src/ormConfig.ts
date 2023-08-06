@@ -13,7 +13,7 @@ export default {
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  synchronize: true,
+  // synchronize: true,
   logging: !process.env.DB_NO_LOGS,
   autoReconnect: true,
   reconnectTries: Number.MAX_VALUE,
@@ -21,7 +21,8 @@ export default {
   entities: [
     `src/user/entity/**/*.${isCompiled ? 'js' : 'ts'}`,
     `src/post/entity/**/*.${isCompiled ? 'js' : 'ts'}`,
-    `src/spaces/entity/**/*.${isCompiled ? 'js' : 'ts'}`,
+    `src/space/entity/**/*.${isCompiled ? 'js' : 'ts'}`,
+    `src/message/entity/**/*.${isCompiled ? 'js' : 'ts'}`,
   ],
   migrations: [
     `src/migration/**/*.${isCompiled ? 'js' : 'ts'}`,

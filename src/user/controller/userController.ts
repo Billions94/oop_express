@@ -1,41 +1,75 @@
-import { Router } from 'express';
-import { setCache } from '../../cache/cache';
 import { UserService } from '../service/userService';
-import { Service } from 'typedi';
+import { Inject } from 'typescript-ioc';
+import { UserInput } from '../interfaces/userInput';
+import {
+  GET,
+  Path,
+  PathParam,
+  POST,
+  PATCH,
+  DELETE,
+  ContextRequest,
+} from 'typescript-rest';
+import { Request } from 'express';
+import { User } from '../entity/user';
+import { UserResponse } from '../interfaces/userResponse';
+import { CreateUserResponse } from '../interfaces/createUserResponse';
+import { LoginResponse } from '../interfaces/loginResponse';
+import { DeleteUserResponse } from '../interfaces/deleteUserResponse';
 
-@Service()
+@Path('api/users')
 export class UserController {
-  private readonly router: Router;
+  @Inject
+  private readonly userService: UserService;
 
-  constructor(private readonly userService: UserService) {
-    this.router = Router();
+  @GET
+  async getUsers(): Promise<User[]> {
+    return this.userService.getUsers();
   }
 
-  init() {
-    this.router.post('/register', async ({ body }, res) => {
-      res.send(await this.userService.createUser(body));
-    });
+  @GET
+  @Path(':id')
+  async getUserById(
+    @PathParam('id') id: number
+  ): Promise<Partial<UserResponse>> {
+    return this.userService.getUserById(id);
+  }
 
-    this.router.post('/login', async ({ body }, res) => {
-      res.send(await this.userService.login(body.email, body.password));
-    });
+  @GET
+  @Path('me')
+  async getLoggedInUser(
+    @ContextRequest { user }: Request
+  ): Promise<Partial<UserResponse>> {
+    return this.userService.getLoggedInUser(<User>user);
+  }
 
-    this.router.get('/', setCache('30 seconds'), async (_req, res) => {
-      res.send(await this.userService.getUsers());
-    });
+  @POST
+  @Path('register')
+  async registerUser(input: UserInput): Promise<Partial<CreateUserResponse>> {
+    return this.userService.createUser(input);
+  }
 
-    this.router.get('/:id', setCache('30 seconds'), async ({ params }, res) => {
-      res.send(await this.userService.getUserById(parseInt(params.id)));
-    });
+  @POST
+  @Path('login')
+  async loginUser(input: {
+    email: string;
+    password: string;
+  }): Promise<Partial<LoginResponse>> {
+    return this.userService.login(input.email, input.password);
+  }
 
-    this.router.patch('/:id', async ({ body, params }, res) => {
-      res.send(await this.userService.updateUser(parseInt(params.id), body));
-    });
+  @PATCH
+  @Path(':id')
+  async updateUser(
+    @PathParam('id') id: number,
+    input: UserInput
+  ): Promise<Partial<UserResponse>> {
+    return this.userService.updateUser(id, input);
+  }
 
-    this.router.delete('/:id', async ({ params }, res) => {
-      res.send(await this.userService.deleteUser(parseInt(params.id)));
-    });
-
-    return this.router;
+  @DELETE
+  @Path(':id')
+  async deleteUser(@PathParam('id') id: number): Promise<DeleteUserResponse> {
+    return this.userService.deleteUser(id);
   }
 }

@@ -3,25 +3,16 @@ import ORMConfig from '../ormconfig';
 import Logger from '../utils/log/logger';
 
 export class DB {
-  public static myDataSource = new DataSource(ORMConfig);
-  static async connect(onError: Function, next?: Function): Promise<void> {
+  public static dataSource = new DataSource(ORMConfig);
+  public static async connect(): Promise<void> {
     try {
-      await DB.init();
-      if (next) {
-        next();
+      if (!DB.dataSource.isInitialized) {
+        await DB.dataSource.initialize();
+        await DB.dataSource.synchronize();
+        Logger.info('Connected to database ✅');
       }
-    } catch (e) {
-      onError();
-    }
-  }
-
-  static async init(): Promise<void> {
-    try {
-      await DB.myDataSource.connect();
-      await DB.myDataSource.synchronize();
-      console.log('Connected to database ✅');
     } catch (e) {
       Logger.error(e.message);
     }
-  };
+  }
 }

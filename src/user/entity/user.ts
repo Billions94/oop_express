@@ -12,8 +12,8 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Post } from '../../post/entity/post';
-import { Space } from '../../spaces/entity/space';
-import bcryptService from 'bcrypt';
+import { Space } from '../../space/entity/space';
+import { Message } from '../../message/entity/message';
 
 @Entity({ name: 'user' })
 export class User {
@@ -26,13 +26,13 @@ export class User {
   @Index({ unique: true })
   @Column('varchar', { name: 'email', length: 500, nullable: false })
   email: string;
-  @OneToMany(() => Post, (post) => post.user, { eager: true })
+  @OneToMany(() => Post, (post) => post.user)
   @JoinColumn({ name: 'user_id' })
   posts: Post[];
-  @ManyToMany(() => Space, (space) => space.users, {
-    eager: true,
-    cascade: ['remove'],
-  })
+  @OneToMany(() => Message, (message) => message.user)
+  @JoinColumn({ name: 'user_id' })
+  messages: Message[];
+  @ManyToMany(() => Space, (space) => space.members)
   @JoinTable({ name: 'user_space' })
   spaces: Space[];
   @Column('varchar', { name: 'password', length: 500, nullable: false })
@@ -45,18 +45,6 @@ export class User {
   updatedAt: Date;
   @DeleteDateColumn()
   deletedAt: Date;
-
-  constructor();
-  constructor(name: string);
-  constructor(name: string, age: number);
-  constructor(name: string, age: number, email: string);
-  constructor(name?: string, age?: number, email?: string, password?: string);
-  constructor(name?: string, age?: number, email?: string, password?: string) {
-    this.name = <string>name;
-    this.age = <number>age;
-    this.email = <string>email;
-    this.password = <string>password;
-  }
 
   @BeforeInsert()
   updateCreatedAt() {

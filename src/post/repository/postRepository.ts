@@ -6,7 +6,7 @@ import { Service } from 'typedi';
 @Service()
 export class PostRepository extends Repository<Post> {
   constructor() {
-    super(Post, DB.myDataSource.createEntityManager());
+    super(Post, DB.dataSource.createEntityManager());
   }
 
   async findById(id: number): Promise<Post | null> {

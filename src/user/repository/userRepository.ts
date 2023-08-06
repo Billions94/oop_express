@@ -6,7 +6,7 @@ import { Service } from 'typedi';
 @Service()
 export class UserRepository extends Repository<User> {
   constructor() {
-    super(User, DB.myDataSource.createEntityManager());
+    super(User, DB.dataSource.createEntityManager());
   }
 
   async isExistByEmail(email: string): Promise<User | null> {

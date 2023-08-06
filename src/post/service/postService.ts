@@ -11,10 +11,13 @@ import { postResponseMapper } from '../mapper/response/postResponseMapper';
 import { DeletePostResponse } from '../interfaces/deletePostResponse';
 import { postRequestMapper } from '../mapper/request/postRequestMapper';
 import Logger from '../../utils/log/Logger';
+import { Inject } from 'typescript-ioc';
 
 @Service()
 export class PostService implements PostServiceInterface {
-  constructor(private readonly postRepository: PostRepository) {}
+  @Inject
+  private readonly  postRepository: PostRepository
+
   async createPost(
     postInput: PostInput,
     user: User

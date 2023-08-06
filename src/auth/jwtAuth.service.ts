@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+import { config } from 'dotenv';
 import * as process from 'process';
 import jwtService from 'jsonwebtoken';
 import bcryptService from 'bcrypt';
@@ -11,9 +11,10 @@ import {
   VerifyRefreshTokenResponse,
   RefreshTokenResponse,
 } from './interface/jwtAuthInterface';
+import { Inject } from 'typescript-ioc';
+import Logger from '../utils/log/Logger';
 
-dotenv.config();
-
+config({ path: '.env' });
 @Service()
 export class JwtAuthService {
   private readonly JWT_ACCESS_TOKEN_SECRET_KEY = <string>(
@@ -30,7 +31,7 @@ export class JwtAuthService {
   );
   private readonly SALT_FACTOR = parseInt(<string>process.env.SALT_FACTOR);
 
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(@Inject private readonly userRepository: UserRepository) {}
 
   async tokenGenerator(user: User): Promise<TokenResponse> {
     const accessToken = await this.generateAccessToken({
@@ -136,21 +137,25 @@ export class JwtAuthService {
   async refreshTokens(
     currentRefreshToken: string
   ): Promise<Partial<RefreshTokenResponse>> {
-    const decodedToken = await this.verifyRefreshToken(currentRefreshToken);
-    const user = await this.userRepository.findById(parseInt(decodedToken.id));
+    try {
+      const decodedToken = await this.verifyRefreshToken(currentRefreshToken);
+      const user = await this.userRepository.findById(
+        parseInt(decodedToken.id)
+      );
 
-    if (!user) throw new Error('User not found');
-
-    if (
-      await bcryptService.compare(
-        currentRefreshToken,
-        <string>user.refreshToken
-      )
-    ) {
-      const { accessToken, refreshToken } = await this.tokenGenerator(user);
-      return { accessToken, refreshToken, user };
-    } else {
-      return { errorMessage: 'Refresh token is invalid' };
+      if (
+        await bcryptService.compare(
+          currentRefreshToken,
+          String(user.refreshToken)
+        )
+      ) {
+        const { accessToken, refreshToken } = await this.tokenGenerator(user);
+        return { accessToken, refreshToken, user };
+      } else {
+        return { errorMessage: 'Refresh token is invalid' };
+      }
+    } catch (err) {
+      return { errorMessage: err.message };
     }
   }
 

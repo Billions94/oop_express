@@ -12,7 +12,7 @@ import { User } from '../../user/entity/user';
 export class Post {
   @PrimaryGeneratedColumn()
   id: number;
-  @ManyToOne(() => User, (user) => user.posts)
+  @ManyToOne(() => User, (user) => user.posts, { eager: true })
   @JoinColumn({ name: 'user_id' })
   user: User;
   @Column('text', { name: 'content', nullable: false })
