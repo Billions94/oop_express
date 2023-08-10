@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:dev": "ts-node-dev ./src/app.ts"
+    "build": "rimraf dist && tsc",
+    "start": "node dist/app.js",
+    "start:dev": "ts-node-dev ./src/app.ts",
+    "start:docker": "npm run build && npm start"
   },
   "keywords": [],
   "author": "",
@@ -48,7 +51,7 @@
   "prettier": {
     "trailingComma": "es5",
     "endOfLine": "lf",
-    "printwidth": 70,
+    "printwidth": 100,
     "tabWidth": 2,
     "semi": true,
     "singleQuote": true,

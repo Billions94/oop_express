@@ -12,24 +12,23 @@ import {
   RefreshTokenResponse,
 } from './interface/jwtAuthInterface';
 import { Inject } from 'typescript-ioc';
-import Logger from '../utils/log/Logger';
 
 config({ path: '.env' });
 @Service()
 export class JwtAuthService {
-  private readonly JWT_ACCESS_TOKEN_SECRET_KEY = <string>(
+  private readonly JWT_ACCESS_TOKEN_SECRET_KEY = String(
     process.env.JWT_ACCESS_TOKEN_SECRET_KEY
   );
-  private readonly JWT_REFRESH_TOKEN_SECRET_KEY = <string>(
+  private readonly JWT_REFRESH_TOKEN_SECRET_KEY = String(
     process.env.JWT_REFRESH_TOKEN_SECRET_KEY
   );
-  private readonly ACCESS_TOKEN_EXPIRATION = <string>(
+  private readonly ACCESS_TOKEN_EXPIRATION = String(
     process.env.ACCESS_TOKEN_EXPIRATION_TIME
   );
-  private readonly REFRESH_TOKEN_EXPIRATION = <string>(
+  private readonly REFRESH_TOKEN_EXPIRATION = String(
     process.env.REFRESH_TOKEN_EXPIRATION_TIME
   );
-  private readonly SALT_FACTOR = parseInt(<string>process.env.SALT_FACTOR);
+  private readonly SALT_FACTOR = parseInt(String(process.env.SALT_FACTOR));
 
   constructor(@Inject private readonly userRepository: UserRepository) {}
 

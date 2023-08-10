@@ -6,12 +6,13 @@ import { DB } from './db/dbConnect';
 import { Routes } from './route/routes';
 import Requestlogger from './utils/log/RequestLogger';
 import { AuthGuard } from './middlewares/authGuard';
-import Logger from './utils/log/logger';
 import { config } from 'dotenv';
 import * as process from 'process';
 import { Inject } from 'typescript-ioc';
 import { SocketServer } from './socket/socket';
 import { RequireUserAuth } from './middlewares/requireUser';
+import Logger from './utils/log/Logger';
+import { Cache } from './cache/cache';
 
 config({ path: '.env' });
 class App {
@@ -30,6 +31,7 @@ class App {
     this.httpServer = http.createServer(this.server);
     this.server.use(cors({ origin: '*' }));
     this.server.use(express.json({ limit: '50mb' }));
+    this.server.use(new Cache('30 seconds').cache);
     this.server.use(Requestlogger);
     this.initializeSocketServer();
     this.connect();
@@ -47,8 +49,8 @@ class App {
     this.server.listen(this.PORT, () => {
       Logger.info(
         process.env.NODE_ENV === 'production'
-          ? `Server started on https://com2gether.onrender.com`
-          : `Server started on http://localhost:${this.PORT}`
+          ? `Server started on ${process.env.PROD_URL}`
+          : `Server started on ${process.env.LOCAL_URL}/${this.PORT}`
       );
     });
   }

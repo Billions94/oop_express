@@ -1,6 +1,6 @@
 import { DB } from '../../db/dbConnect';
 import { User } from '../entity/user';
-import { DeleteResult, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Service } from 'typedi';
 
 @Service()
@@ -18,19 +18,18 @@ export class UserRepository extends Repository<User> {
   }
 
   async findById(id: number): Promise<User> {
-    return await this.findOne({ where: { id: id } }) as User;
+    return (await this.findOne({ where: { id: id } })) as User;
   }
 
   async findByDeletedAt(deletedAt: Date): Promise<User | null> {
-    return await this.findOne({ where: { deletedAt: deletedAt }})
+    return await this.findOne({ where: { deletedAt: deletedAt } });
   }
 
-  async deleteById(id: number): Promise<DeleteResult> {
-    return this.delete({ id: id });
+  async deleteById(id: number): Promise<void> {
+    await this.delete({ id });
   }
 
   async isExists(id: number): Promise<boolean> {
-    const existing = await this.findOne({ where: { id: id } });
-    return !!existing;
+    return !!(await this.findOne({ where: { id: id } }));
   }
 }

@@ -1,7 +1,7 @@
 import { UserRepository } from '../repository/userRepository';
 import { User } from '../entity/user';
 import { UserServiceInterface } from '../interfaces/userServiceInterface';
-import { UserInput } from '../interfaces/userInput';
+import { RegisterUserInput } from '../interfaces/registerUserInput';
 import { CreateUserResponse } from '../interfaces/createUserResponse';
 import { Validator } from '../../utils/validators/validators';
 import { UserResponse } from '../interfaces/userResponse';
@@ -14,6 +14,8 @@ import { userResponseMapper } from '../mapper/response/userResponseMapper';
 import { userRequestMapper } from '../mapper/request/userRequestMapper';
 import { Inject } from 'typescript-ioc';
 import Logger from '../../utils/log/Logger';
+import { UpdateUserInput } from '../interfaces/updateUserInput';
+import { UserDto } from '../interfaces/userDto';
 
 @Service()
 export class UserService implements UserServiceInterface {
@@ -22,7 +24,9 @@ export class UserService implements UserServiceInterface {
   @Inject
   private readonly jwtAuthService: JwtAuthService;
 
-  async createUser(userInput: UserInput): Promise<Partial<CreateUserResponse>> {
+  async createUser(
+    userInput: RegisterUserInput
+  ): Promise<Partial<CreateUserResponse>> {
     try {
       Validator.validateRegisterInput(userInput);
       await Validator.isExistsByEmail(userInput.email);
@@ -65,7 +69,7 @@ export class UserService implements UserServiceInterface {
     return { accessToken, refreshToken };
   }
 
-  async getUsers(): Promise<User[]> {
+  async getUsers(): Promise<UserDto[]> {
     return await this.userRepository
       .find()
       .then((users) => users.map(userResponseMapper));
@@ -94,7 +98,7 @@ export class UserService implements UserServiceInterface {
       return {
         statusCode: 200,
         message: 'success',
-        data: { user: userResponseMapper(user) }
+        data: { user },
       };
     } catch (e) {
       Logger.info(e.message);
@@ -108,15 +112,16 @@ export class UserService implements UserServiceInterface {
 
   async updateUser(
     id: number,
-    userInput: UserInput
+    userInput: UpdateUserInput
   ): Promise<Partial<UserResponse>> {
     try {
+      Logger.info(userInput);
       await Validator.throwErrorIfNotExist(id, 'user');
       await this.userRepository.update(id, userInput);
 
-      const user = <User>(await this.userRepository
-                  .findById(id)
-                  .then(userResponseMapper));
+      const user = <User>(
+        await this.userRepository.findById(id).then(userResponseMapper)
+      );
       await this.userRepository.save(user);
 
       return {

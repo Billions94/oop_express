@@ -1,11 +1,13 @@
 import bcryptService from 'bcrypt';
-import { UserInput } from '../../interfaces/userInput';
+import { RegisterUserInput } from '../../interfaces/registerUserInput';
 import { User } from '../../entity/user';
 import * as process from 'process';
 import dotenv from 'dotenv';
-dotenv.config()
+dotenv.config();
 
-export async function userRequestMapper(userInput: UserInput): Promise<User> {
+export async function userRequestMapper(
+  userInput: RegisterUserInput
+): Promise<User> {
   const user: User = new User();
   user.name = userInput.name;
   user.email = userInput.email;
@@ -13,7 +15,7 @@ export async function userRequestMapper(userInput: UserInput): Promise<User> {
   user.password = await bcryptService.hash(
     userInput.password,
     parseInt(<string>process.env.SALT_FACTOR)
-  )
+  );
 
   return user;
 }

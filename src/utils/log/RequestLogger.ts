@@ -1,12 +1,14 @@
 import { RequestHandler } from 'express';
-import Logger from './logger';
 import dotenv from 'dotenv';
 import * as process from 'process';
+import Logger from './Logger';
 dotenv.config();
 
 const Requestlogger: RequestHandler = (req, res, next) => {
   Logger.info(
-    `${req.method} request to ${process.env.LOCAL_URL}${req.path}`
+    process.env.NODE_ENV === 'production'
+      ? `${req.method} request to ${process.env.PROD_URL}${req.path}`
+      : `${req.method} request to ${process.env.LOCAL_URL}${req.path}`
   );
   next();
 };

@@ -1,10 +1,10 @@
-import { User } from '../entity/user';
+import { UserDto } from './userDto';
 
-export  interface UserResponse {
+export interface UserResponse {
   statusCode?: number;
   message?: string;
   errorMessage?: string;
   data: {
-    user: User | null
-  }
+    user: UserDto | null;
+  };
 }
