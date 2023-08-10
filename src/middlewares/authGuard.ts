@@ -1,11 +1,12 @@
 import { get } from 'lodash';
 import { RequestHandler } from 'express';
 import { JwtAuthService } from '../auth/jwtAuth.service';
-import { Container, Service } from 'typedi';
+import { Service } from 'typedi';
 import { Inject } from 'typescript-ioc';
 import { UserRepository } from '../user/repository/userRepository';
 import { User as ExpressUser } from '../user/entity/user';
 import Logger from '../utils/log/Logger';
+import { GET_PATHS } from '../utils/constants/conts';
 
 declare global {
   namespace Express {
@@ -26,7 +27,9 @@ export class AuthGuard {
   init: RequestHandler = async (req, res, next) => {
     if (!req.headers.authorization) {
       if (
-        req.method === 'GET' ||
+        req.path.includes(GET_PATHS[0]) ||
+        req.path.includes(GET_PATHS[1]) ||
+        req.path.includes(GET_PATHS[2]) ||
         req.path.includes('register') ||
         req.path.includes('login')
       ) {

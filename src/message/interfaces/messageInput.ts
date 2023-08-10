@@ -3,4 +3,4 @@ export interface MessageInput {
   media?: string;
 }
 
-export type UpdateMessageEntity = MessageInput;
+export type UpdateMessageInput = MessageInput;

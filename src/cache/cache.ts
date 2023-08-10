@@ -1,13 +1,17 @@
 import { RequestHandler } from 'express';
-export const cacheService = require('express-api-cache');
+export const restCache = require('express-api-cache');
 
-export const restCache: RequestHandler = (req, res, next) => {
-  if (req.method === 'GET') {
-    cacheService.cache('30 seconds');
-    next();
+export class Cache {
+  private readonly duration: string | number;
+
+  constructor(duration: string | number) {
+    this.duration = duration;
   }
-};
 
-export function setCache(duration: string) {
-  return cacheService.cache(duration);
+  cache: RequestHandler = (req, res, next) => {
+    if (req.method === 'GET') {
+      restCache.cache(this.duration);
+      next();
+    } else next();
+  };
 }

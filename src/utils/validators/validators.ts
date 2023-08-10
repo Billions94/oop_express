@@ -1,4 +1,4 @@
-import { UserInput } from '../../user/interfaces/userInput';
+import { RegisterUserInput } from '../../user/interfaces/registerUserInput';
 import { UserRepository } from '../../user/repository/userRepository';
 import { CustomError } from '../../error/customError';
 import { SpaceRepository } from '../../space/repository/spaceRepository';
@@ -22,7 +22,7 @@ export class Validator {
    * @param input - A set of input fields to be validated.
    * @returns A promise of type void.
    */
-  public static validateRegisterInput(input: UserInput) {
+  public static validateRegisterInput(input: RegisterUserInput) {
     if (input.name.trim().length <= 0)
       throw new Error('Name field cannot be empty');
 

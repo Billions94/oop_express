@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm';
-import ORMConfig from '../ormconfig';
-import Logger from '../utils/log/logger';
+import ORMConfig from '../ormConfig';
+import Logger from '../utils/log/Logger';
 
 export class DB {
   public static dataSource = new DataSource(ORMConfig);

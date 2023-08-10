@@ -9,7 +9,7 @@ import listEndpoints from 'express-list-endpoints';
 import { MessageController } from '../message/controller/messageController';
 
 /**
- * Class for handling routers and controllers
+ * Class for handling routes and controllers
  */
 export class Routes {
   @Inject
@@ -27,7 +27,7 @@ export class Routes {
    * @remarks This is a custom method.
    * Creates routes for all classes we annotate with decorators from typescript-rest
    * and utilizes all controllers specified in the patterns param in the loadControllers method
-   * @param server - Express Application Server.
+   * @param server - Express server.
    * @returns A of type of void.
    * @beta
    */
@@ -35,6 +35,6 @@ export class Routes {
     const router = Router();
     Server.buildServices(server);
     Server.loadControllers(router, 'controller/*', __dirname);
-    console.table(listEndpoints(server))
+    console.table(listEndpoints(server));
   }
 }

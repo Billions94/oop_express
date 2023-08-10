@@ -2,7 +2,7 @@ import { Service } from 'typedi';
 import { Repository } from 'typeorm';
 import { Message } from '../entity/message';
 import { DB } from '../../db/dbConnect';
-import { UpdateMessageEntity } from '../interfaces/messageInput';
+import { UpdateMessageInput } from '../interfaces/messageInput';
 
 @Service()
 export class MessageRepository extends Repository<Message> {
@@ -16,7 +16,7 @@ export class MessageRepository extends Repository<Message> {
 
   async findByIdAndUpdate(
     id: number,
-    update: UpdateMessageEntity
+    update: UpdateMessageInput
   ): Promise<Message | null> {
     const message = await this.findById(id);
 
@@ -24,7 +24,7 @@ export class MessageRepository extends Repository<Message> {
 
     message.content = update.content;
     message.media = update.media ? update.media : '';
-    await this.save(message)
+    await this.save(message);
 
     return message;
   }

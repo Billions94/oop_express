@@ -6,7 +6,7 @@ import { MessageResponse } from '../interfaces/messageResponse';
 import { Message } from '../entity/message';
 import { Inject } from 'typescript-ioc';
 import { MessageRepository } from '../repository/messageRepository';
-import { MessageInput } from '../interfaces/messageInput';
+import { MessageInput, UpdateMessageInput } from '../interfaces/messageInput';
 import { messageRequestMapper } from '../mapper/request/messageRequestMapper';
 import Logger from '../../utils/log/Logger';
 import { messageResponseMapper } from '../mapper/response/messageResponseMapper';
@@ -61,7 +61,7 @@ export class MessageService implements MessageServiceInterface {
 
   async updateMessage(
     id: number,
-    update: MessageInput
+    update: UpdateMessageInput
   ): Promise<Partial<MessageResponse>> {
     try {
       const message = (await this.messageRepository.findByIdAndUpdate(
@@ -83,7 +83,7 @@ export class MessageService implements MessageServiceInterface {
   async deleteMessage(id: number): Promise<DeleteMessageResponse> {
     try {
       if (!(await this.messageRepository.isExists(id))) {
-        throw new Error(`Message ${id} not found`);
+        return { statusCode: 404, success: false };
       }
       return { statusCode: 200, success: true };
     } catch (e) {

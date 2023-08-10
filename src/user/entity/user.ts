@@ -26,6 +26,8 @@ export class User {
   @Index({ unique: true })
   @Column('varchar', { name: 'email', length: 500, nullable: false })
   email: string;
+  @Column('text', { name: 'bio', nullable: true })
+  bio: string;
   @OneToMany(() => Post, (post) => post.user)
   @JoinColumn({ name: 'user_id' })
   posts: Post[];

@@ -2,11 +2,11 @@ import { DataSourceOptions } from 'typeorm';
 import path from 'path';
 import dotenv from 'dotenv';
 import * as process from 'process';
-dotenv.config()
+dotenv.config();
 
 const isCompiled = path.extname(__filename).includes('js');
 
-export default {
+const ORMConfig = {
   type: 'postgres',
   host: process.env.DB_HOST,
   port: parseInt(<string>process.env.DB_PORT),
@@ -24,11 +24,11 @@ export default {
     `src/space/entity/**/*.${isCompiled ? 'js' : 'ts'}`,
     `src/message/entity/**/*.${isCompiled ? 'js' : 'ts'}`,
   ],
-  migrations: [
-    `src/migration/**/*.${isCompiled ? 'js' : 'ts'}`,
-  ],
+  migrations: [`src/migration/**/*.${isCompiled ? 'js' : 'ts'}`],
   cli: {
     'entitiesDir': 'src/user/entity',
     'migrationsDir': 'src/migration',
   },
 } as DataSourceOptions;
+
+export default ORMConfig;
